@@ -9,9 +9,9 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 import { monad, monadTestnet } from "viem/chains";
 
-/** Argus targets Monad. Testnet (10143) is the default; set ARGUS_CHAIN_ID=143 for mainnet. */
+/** Auditora targets Monad. Testnet (10143) is the default; set AUDITORA_CHAIN_ID=143 for mainnet. */
 export function chainId(): number {
-  const n = parseInt(process.env.ARGUS_CHAIN_ID || "10143", 10);
+  const n = parseInt(process.env.AUDITORA_CHAIN_ID || "10143", 10);
   return n === 143 ? 143 : 10143;
 }
 
@@ -56,13 +56,13 @@ export function publicClient(): PublicClient {
 
 /** The registry contract address, if deployed/configured. */
 export function registryAddress(): `0x${string}` | undefined {
-  const a = (process.env.ARGUS_REGISTRY_ADDRESS || "").trim();
+  const a = (process.env.AUDITORA_REGISTRY_ADDRESS || "").trim();
   return /^0x[0-9a-fA-F]{40}$/.test(a) ? (a as `0x${string}`) : undefined;
 }
 
 /** Backend attester wallet — the key that writes attestations onchain. */
 export function walletClient(): WalletClient | undefined {
-  const key = (process.env.ARGUS_SIGNER_KEY || "").trim();
+  const key = (process.env.AUDITORA_SIGNER_KEY || "").trim();
   if (!/^0x[0-9a-fA-F]{64}$/.test(key)) return undefined;
   const account = privateKeyToAccount(key as `0x${string}`);
   return createWalletClient({

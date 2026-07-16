@@ -1,4 +1,4 @@
-// Compile contracts/ArgusRegistry.sol with solc and write the artifact
+// Compile contracts/AuditoraRegistry.sol with solc and write the artifact
 // (abi + bytecode) to lib/registry-artifact.json for the app and deploy script.
 import solc from "solc";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
@@ -6,11 +6,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const source = readFileSync(join(root, "contracts", "ArgusRegistry.sol"), "utf8");
+const source = readFileSync(join(root, "contracts", "AuditoraRegistry.sol"), "utf8");
 
 const input = {
   language: "Solidity",
-  sources: { "ArgusRegistry.sol": { content: source } },
+  sources: { "AuditoraRegistry.sol": { content: source } },
   settings: {
     optimizer: { enabled: true, runs: 200 },
     outputSelection: {
@@ -30,9 +30,9 @@ if (errors.length) {
   process.exit(1);
 }
 
-const contract = out.contracts["ArgusRegistry.sol"]["ArgusRegistry"];
+const contract = out.contracts["AuditoraRegistry.sol"]["AuditoraRegistry"];
 const artifact = {
-  contractName: "ArgusRegistry",
+  contractName: "AuditoraRegistry",
   abi: contract.abi,
   bytecode: "0x" + contract.evm.bytecode.object,
   compiledAt: new Date().toISOString(),
@@ -46,6 +46,6 @@ writeFileSync(
 );
 
 console.log(
-  `Compiled ArgusRegistry (solc ${artifact.solcVersion}) → lib/registry-artifact.json`
+  `Compiled AuditoraRegistry (solc ${artifact.solcVersion}) → lib/registry-artifact.json`
 );
 console.log(`Bytecode size: ${(artifact.bytecode.length - 2) / 2} bytes`);

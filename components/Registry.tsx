@@ -59,7 +59,7 @@ export default function Registry() {
         <div className="eyebrow">The registry</div>
         <h2>Has it been audited? Ask the chain.</h2>
         <p className="how-lede">
-          Every Argus verdict is attested onchain, bound to the contract&apos;s
+          Every Auditora verdict is attested onchain, bound to the contract&apos;s
           codehash at audit time. Look up any Monad address — no account, no
           trust in us required.
         </p>
@@ -95,7 +95,7 @@ export default function Registry() {
           <div className="banner warn">
             Registry not configured on this deployment — set{" "}
             <code style={{ fontFamily: "var(--font-mono)" }}>
-              ARGUS_REGISTRY_ADDRESS
+              AUDITORA_REGISTRY_ADDRESS
             </code>
             .
           </div>

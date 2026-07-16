@@ -1,4 +1,4 @@
-# Argus — the audit layer of Monad
+# Auditora — the audit layer of Monad
 
 **Paste any Monad contract address → three independent AI auditors review the real deployed code → the consensus verdict is attested onchain, bound to the contract's codehash.**
 
@@ -15,10 +15,10 @@ I audit contracts constantly — before bug bounties, before integrating a proto
 
 ## The solution
 
-Argus fixes both halves:
+Auditora fixes both halves:
 
 - **The swarm.** Your contract — or the real code resolved from a bare Monad address — goes to **three models from three providers at once**; a fourth-family referee merges duplicates and records who flagged what. Only findings corroborated by **2+ independent models** count. Disagreement is the signal.
-- **The registry.** The verdict is hashed and attested to `ArgusRegistry` on Monad, bound to the target's `EXTCODEHASH` at audit time. Anyone can look up any address — and if the code at that address ever changes, the attestation **goes stale automatically**. No trust in us required.
+- **The registry.** The verdict is hashed and attested to `AuditoraRegistry` on Monad, bound to the target's `EXTCODEHASH` at audit time. Anyone can look up any address — and if the code at that address ever changes, the attestation **goes stale automatically**. No trust in us required.
 - **The business model, onchain.** `requestAudit(target)` takes a small MON fee and queues any deployed contract for a swarm audit; fulfillment marks the request done in the same attestation. Pay-per-audit, no accounts.
 
 ## How to read a result
@@ -29,7 +29,7 @@ Argus fixes both halves:
 | **Unverified (lone)** | one model only | a lead to check, or noise — collapsed by default |
 | **No consensus** | nothing corroborated | on sound code, the expected result |
 
-An attestation records exactly what the swarm concluded and when. It is **not** a certificate of safety — models can share blind spots. Argus is a first-pass triage layer, loudest exactly where it should be: when the auditors disagree.
+An attestation records exactly what the swarm concluded and when. It is **not** a certificate of safety — models can share blind spots. Auditora is a first-pass triage layer, loudest exactly where it should be: when the auditors disagree.
 
 ## Architecture
 
@@ -47,10 +47,10 @@ An attestation records exactly what the swarm concluded and when. It is **not** 
 referee (Qwen — a 4th family)  merges duplicates, records who flagged what
    │
    ▼
-verdict ──► keccak256(canonical report) ──► ArgusRegistry.attest() on Monad
+verdict ──► keccak256(canonical report) ──► AuditoraRegistry.attest() on Monad
 ```
 
-- **Contract:** [`contracts/ArgusRegistry.sol`](contracts/ArgusRegistry.sol) — attestations bound to codehash, paid request queue, freshness check (`latest()` returns whether the current codehash still matches).
+- **Contract:** [`contracts/AuditoraRegistry.sol`](contracts/AuditoraRegistry.sol) — attestations bound to codehash, paid request queue, freshness check (`latest()` returns whether the current codehash still matches).
 - **App:** Next.js (App Router) + TypeScript; chain access via viem; models via any OpenAI-compatible gateway (OpenRouter by default).
 - **Honesty rails:** posture computed from consensus data, never from model prose; bytecode-only audits are labelled low-confidence; mock runs are never attested; every run shows its real USD cost.
 
@@ -61,26 +61,26 @@ npm install
 cp .env.example .env.local        # add your OpenRouter key
 
 npm run compile                   # solc → lib/registry-artifact.json
-ARGUS_SIGNER_KEY=0x… npm run deploy   # deploy ArgusRegistry to Monad testnet
-# put the printed address in .env.local as ARGUS_REGISTRY_ADDRESS
+AUDITORA_SIGNER_KEY=0x… npm run deploy   # deploy AuditoraRegistry to Monad testnet
+# put the printed address in .env.local as AUDITORA_REGISTRY_ADDRESS
 
 npm run dev                       # http://localhost:3000
 ```
 
-With no key set (or `ARGUS_FORCE_MOCK=1`), Argus runs in **mock mode** against canned data so you can explore the interface offline. Live audits of pasted source need only the OpenRouter key; auditing by address and onchain attestation need the Monad bits.
+With no key set (or `AUDITORA_FORCE_MOCK=1`), Auditora runs in **mock mode** against canned data so you can explore the interface offline. Live audits of pasted source need only the OpenRouter key; auditing by address and onchain attestation need the Monad bits.
 
 ## Configuration
 
 | Variable | Purpose |
 | --- | --- |
 | `OPENROUTER_API_KEY` | one key for every model family (required for live audits) |
-| `ARGUS_AUDITORS` | comma-separated auditor slugs (default: GPT-4.1, Gemini 2.5 Pro, DeepSeek) |
-| `ARGUS_REFEREE` | reconciling model (default: Qwen3 Max — a fourth family) |
-| `ARGUS_CHAIN_ID` | `10143` Monad testnet (default) · `143` mainnet |
-| `ARGUS_REGISTRY_ADDRESS` | deployed `ArgusRegistry` address |
-| `ARGUS_SIGNER_KEY` | attester wallet key (needs a little MON for gas) |
-| `ETHERSCAN_API_KEY` | optional — fetches *verified source* for addresses; without it Argus audits raw deployed bytecode via RPC |
-| `ARGUS_FORCE_MOCK` | `1` forces mock mode (demo-safety switch) |
+| `AUDITORA_AUDITORS` | comma-separated auditor slugs (default: GPT-4.1, Gemini 2.5 Pro, DeepSeek) |
+| `AUDITORA_REFEREE` | reconciling model (default: Qwen3 Max — a fourth family) |
+| `AUDITORA_CHAIN_ID` | `10143` Monad testnet (default) · `143` mainnet |
+| `AUDITORA_REGISTRY_ADDRESS` | deployed `AuditoraRegistry` address |
+| `AUDITORA_SIGNER_KEY` | attester wallet key (needs a little MON for gas) |
+| `ETHERSCAN_API_KEY` | optional — fetches *verified source* for addresses; without it Auditora audits raw deployed bytecode via RPC |
+| `AUDITORA_FORCE_MOCK` | `1` forces mock mode (demo-safety switch) |
 
 ## API
 
@@ -93,4 +93,4 @@ With no key set (or `ARGUS_FORCE_MOCK=1`), Argus runs in **mock mode** against c
 
 - A proxy's own codehash never changes when its implementation is swapped — audit **implementation addresses**, not proxies.
 - The canonical report JSON is returned to the caller, not stored by us; the chain holds its hash. Keep the JSON to prove what the hash commits to.
-- Attestations are written by the Argus attester key. The registry proves *what Argus concluded and when* — decentralizing the attester set is future work.
+- Attestations are written by the Auditora attester key. The registry proves *what Auditora concluded and when* — decentralizing the attester set is future work.

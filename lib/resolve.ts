@@ -109,7 +109,7 @@ export async function resolveContractInput(input: string): Promise<Resolved> {
       source: {
         ...base,
         kind: "address-unfetched",
-        note: `No contract code found at this address on ${chain} — it may be an EOA, or on the other Monad network (set ARGUS_CHAIN_ID). Set ETHERSCAN_API_KEY to fetch verified source.`,
+        note: `No contract code found at this address on ${chain} — it may be an EOA, or on the other Monad network (set AUDITORA_CHAIN_ID). Set ETHERSCAN_API_KEY to fetch verified source.`,
       },
     };
   }
@@ -149,7 +149,7 @@ export async function resolveContractInput(input: string): Promise<Resolved> {
       source: {
         ...base,
         kind: "address-unfetched",
-        note: `No contract code found at this address on ${chain} — it may be an EOA, self-destructed, or on the other Monad network (set ARGUS_CHAIN_ID).`,
+        note: `No contract code found at this address on ${chain} — it may be an EOA, self-destructed, or on the other Monad network (set AUDITORA_CHAIN_ID).`,
       },
     };
   } catch (err) {

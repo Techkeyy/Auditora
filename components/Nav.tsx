@@ -10,7 +10,7 @@ export default function Nav({ variant = "app" }: { variant?: "app" | "docs" }) {
     <nav className="nav">
       <div className="wrap nav-inner">
         <Link href="/" className="brand">
-          <span className="brand-name">Argus</span>
+          <span className="brand-name">Auditora</span>
         </Link>
         <div className="nav-links">
           {variant === "app" ? (

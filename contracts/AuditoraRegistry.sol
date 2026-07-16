@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-/// @title  ArgusRegistry — a public audit-attestation registry for Monad
-/// @notice Argus runs a multi-model AI audit swarm over a deployed contract,
+/// @title  AuditoraRegistry — a public audit-attestation registry for Monad
+/// @notice Auditora runs a multi-model AI audit swarm over a deployed contract,
 ///         then anchors the consensus verdict here. Anyone can look up any
 ///         address and see: has this been audited, when, what did the swarm
 ///         conclude — and does the code hash still match what was audited.
@@ -11,7 +11,7 @@ pragma solidity ^0.8.24;
 ///         verdict can never be carried over to different code. (Known limit:
 ///         a proxy's own codehash never changes — registry consumers should
 ///         audit implementation addresses, not proxies.)
-contract ArgusRegistry {
+contract AuditoraRegistry {
     struct Attestation {
         bytes32 codehash;     // EXTCODEHASH of target at audit time
         bytes32 reportHash;   // keccak256 of the canonical report JSON
@@ -22,7 +22,7 @@ contract ArgusRegistry {
         address attester;
     }
 
-    /// A paid, onchain request for Argus to audit `target`.
+    /// A paid, onchain request for Auditora to audit `target`.
     struct Request {
         address target;
         address requester;

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Argus — the audit layer of Monad",
+  title: "Auditora — the audit layer of Monad",
   description:
     "Paste any Monad contract address: three independent AI auditors review the real deployed code, a referee reconciles them, and the consensus verdict is attested onchain — bound to the contract's codehash. A public audit registry anyone can check.",
 };

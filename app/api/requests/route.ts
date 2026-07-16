@@ -28,7 +28,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   if (!canAttest()) {
     return NextResponse.json(
-      { error: "Attester not configured (ARGUS_REGISTRY_ADDRESS / ARGUS_SIGNER_KEY)." },
+      { error: "Attester not configured (AUDITORA_REGISTRY_ADDRESS / AUDITORA_SIGNER_KEY)." },
       { status: 503 }
     );
   }

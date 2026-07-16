@@ -13,8 +13,8 @@ export function getClient(): OpenAI | null {
     baseURL: GATEWAY_BASE_URL,
     defaultHeaders: {
       // OpenRouter attribution headers (optional, improves rate limits)
-      "HTTP-Referer": process.env.ARGUS_PUBLIC_URL || "http://localhost:3000",
-      "X-Title": "Argus",
+      "HTTP-Referer": process.env.AUDITORA_PUBLIC_URL || "http://localhost:3000",
+      "X-Title": "Auditora",
     },
   });
 }

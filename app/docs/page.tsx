@@ -1,7 +1,7 @@
 import Nav from "@/components/Nav";
 
 export const metadata = {
-  title: "Argus — Docs",
+  title: "Auditora — Docs",
 };
 
 export default function Docs() {
@@ -10,9 +10,9 @@ export default function Docs() {
       <Nav variant="docs" />
       <div className="doc">
         <div className="eyebrow">Documentation</div>
-        <h1>How Argus works</h1>
+        <h1>How Auditora works</h1>
         <p className="lead">
-          Argus turns a single, over-confident AI answer into a reconciled verdict
+          Auditora turns a single, over-confident AI answer into a reconciled verdict
           from a swarm of independent models — then anchors that verdict to a public
           registry on Monad, bound to the contract&apos;s codehash. This page explains
           the mechanism, the honesty model, and the onchain layer.
@@ -24,7 +24,7 @@ export default function Docs() {
           <a href="#pipeline">2 · The pipeline</a>
           <a href="#consensus">3 · Consensus &amp; triage</a>
           <a href="#registry">4 · The onchain registry</a>
-          <a href="#honesty">5 · What Argus does and doesn&apos;t claim</a>
+          <a href="#honesty">5 · What Auditora does and doesn&apos;t claim</a>
           <a href="#modes">6 · Modes</a>
           <a href="#run">7 · Running it yourself</a>
         </div>
@@ -37,7 +37,7 @@ export default function Docs() {
           mention.
         </p>
         <p>
-          Argus exploits a simple asymmetry:{" "}
+          Auditora exploits a simple asymmetry:{" "}
           <strong>disagreement between independent models is a reliable warning
           signal.</strong>{" "}
           If three auditors are asked the same question and one flags a critical the
@@ -47,7 +47,7 @@ export default function Docs() {
         </p>
         <p>
           And because the verdict is only useful if others can find and trust it,
-          Argus doesn&apos;t stop at a web report: every audit of a deployed contract
+          Auditora doesn&apos;t stop at a web report: every audit of a deployed contract
           is <strong>attested on Monad</strong>, where anyone can look it up without
           trusting us.
         </p>
@@ -67,7 +67,7 @@ export default function Docs() {
 referee (4th family)  merges duplicates, records who flagged what
    │
    ▼
-verdict  ──►  keccak256(report)  ──►  ArgusRegistry.attest() on Monad`}</code>
+verdict  ──►  keccak256(report)  ──►  AuditoraRegistry.attest() on Monad`}</code>
         </pre>
         <p>
           Every auditor is called in parallel, so three opinions cost roughly the
@@ -104,8 +104,8 @@ verdict  ──►  keccak256(report)  ──►  ArgusRegistry.attest() on Mona
 
         <h2 id="registry">4 · The onchain registry</h2>
         <p>
-          When Argus audits code resolved from a real Monad address, it anchors the
-          verdict to <code>ArgusRegistry</code>, a small contract on Monad. Each
+          When Auditora audits code resolved from a real Monad address, it anchors the
+          verdict to <code>AuditoraRegistry</code>, a small contract on Monad. Each
           attestation stores:
         </p>
         <ul>
@@ -117,7 +117,7 @@ verdict  ──►  keccak256(report)  ──►  ArgusRegistry.attest() on Mona
           </li>
           <li>
             <code>reportHash</code> — <code>keccak256</code> of the canonical report
-            JSON. Argus returns the canonical report to the caller; anyone holding
+            JSON. Auditora returns the canonical report to the caller; anyone holding
             it can re-hash and verify it against the chain.
           </li>
           <li>
@@ -129,7 +129,7 @@ verdict  ──►  keccak256(report)  ──►  ArgusRegistry.attest() on Mona
         <p>
           The registry also has a <strong>paid request queue</strong>:{" "}
           <code>requestAudit(target)</code> takes a small fee in MON and emits an
-          event; the Argus operator fulfills open requests and the attestation marks
+          event; the Auditora operator fulfills open requests and the attestation marks
           them done. That&apos;s the business model, onchain: audits as a public
           service with pay-per-use pricing.
         </p>
@@ -139,9 +139,9 @@ verdict  ──►  keccak256(report)  ──►  ArgusRegistry.attest() on Mona
           proxies.
         </p>
 
-        <h2 id="honesty">5 · What Argus does and doesn&apos;t claim</h2>
+        <h2 id="honesty">5 · What Auditora does and doesn&apos;t claim</h2>
         <p>
-          Argus is a <strong>first-pass triage layer</strong>, not a replacement for a
+          Auditora is a <strong>first-pass triage layer</strong>, not a replacement for a
           professional audit and not a safety stamp. Three models trained on
           overlapping data can share a blind spot and all miss the same bug — so
           &ldquo;no findings&rdquo; means &ldquo;nothing obvious surfaced,&rdquo; never
@@ -159,7 +159,7 @@ verdict  ──►  keccak256(report)  ──►  ArgusRegistry.attest() on Mona
         <ul>
           <li>
             <strong>Contract audit</strong> — the flagship. Paste Solidity, or just a
-            Monad address: Argus fetches the real deployed code and audits that.
+            Monad address: Auditora fetches the real deployed code and audits that.
             Address audits are attested onchain.
           </li>
           <li>
@@ -177,19 +177,19 @@ verdict  ──►  keccak256(report)  ──►  ArgusRegistry.attest() on Mona
           <code>{`npm install
 cp .env.example .env.local     # add your OpenRouter key
 npm run compile                # solc → lib/registry-artifact.json
-ARGUS_SIGNER_KEY=0x… npm run deploy   # deploy the registry to Monad testnet
+AUDITORA_SIGNER_KEY=0x… npm run deploy   # deploy the registry to Monad testnet
 npm run dev                    # http://localhost:3000`}</code>
         </pre>
         <p>
-          With no key set, Argus runs in <strong>mock mode</strong> — the full
+          With no key set, Auditora runs in <strong>mock mode</strong> — the full
           interface works against canned data so you can explore it offline. Add{" "}
           <code>OPENROUTER_API_KEY</code> to go live, and{" "}
-          <code>ARGUS_REGISTRY_ADDRESS</code> + <code>ARGUS_SIGNER_KEY</code> to
+          <code>AUDITORA_REGISTRY_ADDRESS</code> + <code>AUDITORA_SIGNER_KEY</code> to
           anchor verdicts on Monad.
         </p>
         <hr />
         <p className="foot-meta">
-          Argus · built for the Spark Hackathon 2026 · every address audit ends
+          Auditora · built for the Spark Hackathon 2026 · every address audit ends
           onchain.
         </p>
       </div>

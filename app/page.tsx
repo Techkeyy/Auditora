@@ -67,7 +67,7 @@ export default function Home() {
             <em>The verdict goes onchain.</em>
           </h1>
           <p className="lede">
-            A single AI misses things and says nothing. Argus fetches the{" "}
+            A single AI misses things and says nothing. Auditora fetches the{" "}
             <b>real deployed code</b> behind any Monad address, sends it to{" "}
             <b>three independent models at once</b>, reconciles their findings — and
             anchors the consensus verdict to a <b>public onchain registry</b>, bound
@@ -216,7 +216,7 @@ export default function Home() {
               </div>
               <h3>Anchor onchain</h3>
               <p>
-                The verdict is hashed and attested to the Argus registry on Monad,
+                The verdict is hashed and attested to the Auditora registry on Monad,
                 bound to the contract&apos;s codehash — if the code ever changes,
                 the badge goes stale automatically.
               </p>
@@ -229,11 +229,11 @@ export default function Home() {
           <div className="note">
             <div className="eyebrow">The honest part</div>
             <p>
-              Argus is a first-pass triage layer, not a substitute for a professional
+              Auditora is a first-pass triage layer, not a substitute for a professional
               audit. Agreement between models is a strong signal, not a proof of
               safety — models can share blind spots. An attestation records exactly
               what the swarm concluded and when — it is not a certificate of safety.
-              Argus is loudest exactly where it should be: when the auditors disagree.
+              Auditora is loudest exactly where it should be: when the auditors disagree.
             </p>
           </div>
         </div>
@@ -242,7 +242,7 @@ export default function Home() {
       <footer className="footer">
         <div className="wrap footer-inner">
           <div className="brand">
-            <span className="brand-name">Argus</span>
+            <span className="brand-name">Auditora</span>
           </div>
           <div className="muted">
             The audit layer of Monad · Spark Hackathon 2026
@@ -375,7 +375,7 @@ function Results({
             <code style={{ fontFamily: "var(--font-mono)" }}>
               {meta.attestation.reportHash.slice(0, 10)}…
             </code>{" "}
-            attested to the Argus registry, bound to this contract&apos;s codehash.{" "}
+            attested to the Auditora registry, bound to this contract&apos;s codehash.{" "}
             <a href={meta.attestation.explorerUrl} target="_blank" rel="noreferrer">
               View the transaction →
             </a>

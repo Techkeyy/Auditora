@@ -14,7 +14,7 @@ import type {
 
 function auditorModels(): string[] {
   return (
-    process.env.ARGUS_AUDITORS ||
+    process.env.AUDITORA_AUDITORS ||
     "openai/gpt-4.1,google/gemini-2.5-pro,deepseek/deepseek-chat"
   )
     .split(",")
@@ -23,7 +23,7 @@ function auditorModels(): string[] {
 }
 
 function refereeModel(): string {
-  return process.env.ARGUS_REFEREE || "qwen/qwen3-max";
+  return process.env.AUDITORA_REFEREE || "qwen/qwen3-max";
 }
 
 function receiptFrom(costs: CallCost[]) {
@@ -46,7 +46,7 @@ function mockReceipt() {
 }
 
 function forceMock(): boolean {
-  return process.env.ARGUS_FORCE_MOCK === "1";
+  return process.env.AUDITORA_FORCE_MOCK === "1";
 }
 
 /**

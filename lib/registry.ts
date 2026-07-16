@@ -71,7 +71,7 @@ export async function attestAudit(
   const wallet = walletClient();
   if (!registry || !wallet) {
     throw new Error(
-      "Registry not configured — set ARGUS_REGISTRY_ADDRESS and ARGUS_SIGNER_KEY."
+      "Registry not configured — set AUDITORA_REGISTRY_ADDRESS and AUDITORA_SIGNER_KEY."
     );
   }
 

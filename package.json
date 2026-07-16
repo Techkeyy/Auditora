@@ -1,8 +1,8 @@
 {
-  "name": "argus",
+  "name": "auditora",
   "version": "0.1.0",
   "private": true,
-  "description": "Argus — the audit layer of Monad: a multi-model AI audit swarm whose consensus verdicts are attested onchain.",
+  "description": "Auditora — the audit layer of Monad: a multi-model AI audit swarm whose consensus verdicts are attested onchain.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

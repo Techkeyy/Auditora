@@ -1,6 +1,6 @@
-// Deploy ArgusRegistry to Monad. Usage:
-//   ARGUS_SIGNER_KEY=0x... node scripts/deploy.mjs [feeInMon]
-// Defaults: Monad testnet (10143), fee 0.05 MON. Set ARGUS_CHAIN_ID=143 for mainnet.
+// Deploy AuditoraRegistry to Monad. Usage:
+//   AUDITORA_SIGNER_KEY=0x... node scripts/deploy.mjs [feeInMon]
+// Defaults: Monad testnet (10143), fee 0.05 MON. Set AUDITORA_CHAIN_ID=143 for mainnet.
 import { createPublicClient, createWalletClient, http, parseEther, formatEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { monad, monadTestnet } from "viem/chains";
@@ -13,13 +13,13 @@ const artifact = JSON.parse(
   readFileSync(join(root, "lib", "registry-artifact.json"), "utf8")
 );
 
-const key = (process.env.ARGUS_SIGNER_KEY || "").trim();
+const key = (process.env.AUDITORA_SIGNER_KEY || "").trim();
 if (!/^0x[0-9a-fA-F]{64}$/.test(key)) {
-  console.error("Set ARGUS_SIGNER_KEY to a funded private key (0x + 64 hex).");
+  console.error("Set AUDITORA_SIGNER_KEY to a funded private key (0x + 64 hex).");
   process.exit(1);
 }
 
-const chain = process.env.ARGUS_CHAIN_ID === "143" ? monad : monadTestnet;
+const chain = process.env.AUDITORA_CHAIN_ID === "143" ? monad : monadTestnet;
 const rpc = process.env.MONAD_RPC_URL || chain.rpcUrls.default.http[0];
 const account = privateKeyToAccount(key);
 const publicClient = createPublicClient({ chain, transport: http(rpc) });
@@ -53,8 +53,8 @@ if (receipt.status !== "success" || !receipt.contractAddress) {
 
 const explorer =
   chain.blockExplorers?.default?.url || "https://testnet.monadexplorer.com";
-console.log(`\nArgusRegistry deployed: ${receipt.contractAddress}`);
+console.log(`\nAuditoraRegistry deployed: ${receipt.contractAddress}`);
 console.log(`Explorer: ${explorer}/address/${receipt.contractAddress}`);
 console.log(`Gas used: ${receipt.gasUsed}`);
 console.log(`\nAdd to .env.local:`);
-console.log(`ARGUS_REGISTRY_ADDRESS=${receipt.contractAddress}`);
+console.log(`AUDITORA_REGISTRY_ADDRESS=${receipt.contractAddress}`);
