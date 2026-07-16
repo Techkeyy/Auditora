@@ -60,9 +60,11 @@ export function registryAddress(): `0x${string}` | undefined {
   return /^0x[0-9a-fA-F]{40}$/.test(a) ? (a as `0x${string}`) : undefined;
 }
 
-/** Backend attester wallet — the key that writes attestations onchain. */
+/** Backend attester wallet — the key that writes attestations onchain.
+ *  Accepts the key with or without the 0x prefix (MetaMask exports without). */
 export function walletClient(): WalletClient | undefined {
-  const key = (process.env.AUDITORA_SIGNER_KEY || "").trim();
+  let key = (process.env.AUDITORA_SIGNER_KEY || "").trim();
+  if (/^[0-9a-fA-F]{64}$/.test(key)) key = "0x" + key;
   if (!/^0x[0-9a-fA-F]{64}$/.test(key)) return undefined;
   const account = privateKeyToAccount(key as `0x${string}`);
   return createWalletClient({
