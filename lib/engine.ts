@@ -1,7 +1,8 @@
 import { hasKey } from "./gateway";
 import { runAuditors } from "./auditors";
 import { reconcile } from "./consensus";
-import { resolveContractInput } from "./resolve";
+import { resolveContractInput, isAddress } from "./resolve";
+import { runRecon, reconPromptBlock } from "./recon";
 import { mockAuditors, mockMerged } from "./mock";
 import type {
   AuditResult,
@@ -32,6 +33,7 @@ function receiptFrom(costs: CallCost[]) {
     totalUsd: costs.reduce((a, c) => a + (c.usd || 0), 0),
     promptTokens: costs.reduce((a, c) => a + (c.promptTokens || 0), 0),
     completionTokens: costs.reduce((a, c) => a + (c.completionTokens || 0), 0),
+    estimated: costs.some((c) => c.estimated),
   };
 }
 
@@ -42,6 +44,7 @@ function mockReceipt() {
     totalUsd: 0.0412,
     promptTokens: 9834,
     completionTokens: 3187,
+    estimated: true,
   };
 }
 
@@ -120,18 +123,37 @@ export async function runAudit(mode: Mode, input: string): Promise<AuditResult> 
   }
 
   // LIVE MODE — real gateway calls.
-  // For contract mode, resolve a bare on-chain address to its real code first,
-  // so the swarm audits actual source/bytecode instead of model memory.
+  // For contract mode with a bare address, the agent first runs on-chain recon:
+  // it learns who controls the code, what it holds, and — for a proxy — where the
+  // real logic lives. The audit then targets the implementation, and the recon
+  // evidence is handed to the swarm so severity reflects live exploitability.
   let auditInput = input;
   let source: SourceMeta = { kind: "inline" };
+  let recon: Awaited<ReturnType<typeof runRecon>> | undefined;
+  let reconContext: string | undefined;
+
   if (mode === "contract") {
-    const resolved = await resolveContractInput(input);
+    if (isAddress(input)) {
+      try {
+        recon = await runRecon(input);
+        reconContext = reconPromptBlock(recon);
+      } catch {
+        // recon is best-effort — a failure never blocks the audit
+      }
+    }
+    // Audit the implementation behind a proxy, not the empty proxy shell.
+    const codeTarget =
+      recon?.isProxy && recon.implementation ? recon.implementation : input;
+    const resolved = await resolveContractInput(codeTarget);
     auditInput = resolved.input;
     source = resolved.source;
+    if (recon?.isProxy && recon.implementation) {
+      source = { ...source, note: `${source.note ?? ""} (proxy at ${recon.address} → implementation ${recon.implementation})`.trim() };
+    }
   }
 
   const models = auditorModels();
-  const auditors = await runAuditors(models, mode, auditInput);
+  const auditors = await runAuditors(models, mode, auditInput, reconContext);
 
   // If every auditor failed (commonly an out-of-credits gateway), don't call the
   // referee — it would throw the same error and 500 the whole request. Return an
@@ -160,6 +182,7 @@ export async function runAudit(mode: Mode, input: string): Promise<AuditResult> 
         refereeModel: referee,
         bytecodeMode: detectBytecode(mode, auditInput),
         source,
+        recon,
       },
     };
   }
@@ -191,6 +214,7 @@ export async function runAudit(mode: Mode, input: string): Promise<AuditResult> 
       refereeModel: referee,
       bytecodeMode: detectBytecode(mode, auditInput),
       source,
+      recon,
     },
   };
 }

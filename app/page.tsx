@@ -60,17 +60,18 @@ export default function Home() {
       <header className="hero">
         <div className="hero-art" aria-hidden="true" />
         <div className="wrap">
-          <div className="eyebrow">The audit layer of Monad · swarm-verified, chain-anchored</div>
+          <div className="eyebrow">The audit layer of Monad · chain-aware, consensus-verified, anchored</div>
           <h1>
             Paste any Monad address.<br />
-            Three auditors argue.<br />
+            Auditora reads the chain.<br />
             <em>The verdict goes onchain.</em>
           </h1>
           <p className="lede">
-            A single AI misses things and says nothing. Auditora fetches the{" "}
-            <b>real deployed code</b> behind any Monad address, sends it to{" "}
-            <b>three independent models at once</b>, reconciles their findings — and
-            anchors the consensus verdict to a <b>public onchain registry</b>, bound
+            A single AI misses things and says nothing. Auditora first reads the{" "}
+            <b>live chain</b> around an address — who controls it, what it holds,
+            where a proxy really points — then puts the <b>real deployed code</b> to
+            a <b>swarm of independent models</b>, reconciles their findings, and
+            anchors the consensus verdict to a <b>public onchain registry</b> bound
             to the contract&apos;s codehash. Anyone can check any address, forever.
           </p>
         </div>
@@ -121,11 +122,12 @@ export default function Home() {
 
           <div className="console-foot">
             <div className="foot-meta">
-              swarm: <b>three models · three providers</b> &nbsp;→&nbsp; referee:{" "}
-              <b>a fourth family</b> &nbsp;→&nbsp; verdict: <b>anchored on Monad</b>
+              <b>on-chain recon</b> &nbsp;→&nbsp; <b>independent model swarm</b>{" "}
+              &nbsp;→&nbsp; <b>neutral referee</b> &nbsp;→&nbsp; verdict{" "}
+              <b>anchored on Monad</b>
             </div>
             <button className="btn btn-primary" onClick={run} disabled={loading}>
-              {loading ? "Auditing…" : "Run the swarm"}
+              {loading ? "Auditing…" : "Run the audit"}
             </button>
           </div>
         </div>
@@ -134,8 +136,8 @@ export default function Home() {
         {loading && (
           <div className="banner info">
             <span className="spinner" />
-            Fanning out to three providers, reconciling their findings, and
-            anchoring the verdict… this takes a few seconds.
+            Running on-chain recon, fanning out to the model swarm, reconciling
+            the findings, and anchoring the verdict… this takes a few seconds.
           </div>
         )}
 
@@ -151,7 +153,7 @@ export default function Home() {
           <div className="eyebrow">How it works</div>
           <h2>Disagreement is the signal.</h2>
           <p className="how-lede">
-            Four moves take a raw contract to a verdict you can actually weigh.
+            Four moves take a bare address to a verdict you can actually weigh.
           </p>
 
           <div className="pipeline">
@@ -161,16 +163,17 @@ export default function Home() {
               <div className="stage-top">
                 <span className="stage-node num">01</span>
               </div>
-              <h3>Fan out</h3>
+              <h3>Recon the chain</h3>
               <p>
-                Your contract — or the real code resolved from a bare Monad
-                address — hits three models from three providers at once. Diverse
-                models catch different bugs.
+                Before a model sees the code, Auditora reads the live chain: who
+                controls it, what it holds, and — for a proxy — where the real
+                logic lives. Context decides whether a bug is theory or a live
+                drain.
               </p>
               <div className="fan">
-                <span className="fanchip">OpenAI</span>
-                <span className="fanchip">Google</span>
-                <span className="fanchip">DeepSeek</span>
+                <span className="fanchip">owner</span>
+                <span className="fanchip">balance</span>
+                <span className="fanchip">proxy impl</span>
               </div>
             </div>
 
@@ -178,13 +181,16 @@ export default function Home() {
               <div className="stage-top">
                 <span className="stage-node num">02</span>
               </div>
-              <h3>Reconcile</h3>
+              <h3>Fan out</h3>
               <p>
-                A neutral referee merges the same vulnerability across auditors —
-                even when worded differently — and records who flagged what.
+                The real code plus that on-chain context hits several independent
+                models at once. Diverse models catch different bugs; each returns
+                structured findings.
               </p>
               <div className="fan">
-                <span className="fanchip solo">referee · qwen3-max</span>
+                <span className="fanchip">independent</span>
+                <span className="fanchip">model</span>
+                <span className="fanchip">swarm</span>
               </div>
             </div>
 
@@ -192,20 +198,21 @@ export default function Home() {
               <div className="stage-top">
                 <span className="stage-node num">03</span>
               </div>
-              <h3>Triage</h3>
+              <h3>Reconcile &amp; triage</h3>
               <p>
-                Agreement becomes a verdict — from unanimous to a lone dissent you
-                should read closely.
+                A neutral referee merges the same vuln across auditors and records
+                who flagged what. Agreement becomes the verdict — corroborated
+                risks rise, lone flags are quarantined.
               </p>
               <div className="outcomes">
                 <span className="oc oc-confirmed">
-                  <span className="ocdot" />Confirmed · 3/3
+                  <span className="ocdot" />Corroborated
                 </span>
                 <span className="oc oc-contested">
-                  <span className="ocdot" />Contested · 2/3
+                  <span className="ocdot" />Contested
                 </span>
                 <span className="oc oc-lone">
-                  <span className="ocdot" />Lone flag · 1/3
+                  <span className="ocdot" />Lone flag
                 </span>
               </div>
             </div>
@@ -283,7 +290,49 @@ function Results({
         <div className="banner info" style={{ marginBottom: 16 }}>
           Running in <b>mock mode</b> — no gateway key set. Numbers and findings are
           illustrative. Add <code style={{ fontFamily: "var(--font-mono)" }}>
-          OPENROUTER_API_KEY</code> to go live.
+          GATEWAY_API_KEY</code> to go live.
+        </div>
+      )}
+
+      {meta.recon && meta.recon.isContract && (
+        <div className="recon">
+          <div className="recon-head">
+            <div className="eyebrow">On-chain recon</div>
+            <span className="recon-sub">
+              gathered live before the audit · {meta.recon.chainName}
+            </span>
+          </div>
+          <div className="recon-grid">
+            <div className="recon-item">
+              <span className="recon-k">Verified</span>
+              <span className="recon-v">
+                {meta.recon.verified ? (meta.recon.contractName || "yes") : "no"}
+              </span>
+            </div>
+            <div className="recon-item">
+              <span className="recon-k">Proxy</span>
+              <span className="recon-v">
+                {meta.recon.isProxy ? "yes → impl" : "no"}
+              </span>
+            </div>
+            <div className="recon-item">
+              <span className="recon-k">Owner</span>
+              <span className={`recon-v recon-${meta.recon.ownerType}`}>
+                {meta.recon.ownerType.replace("-like", "")}
+              </span>
+            </div>
+            <div className="recon-item">
+              <span className="recon-k">Funds at risk</span>
+              <span className="recon-v num">{meta.recon.balanceEth} MON</span>
+            </div>
+          </div>
+          {meta.recon.notes.length > 0 && (
+            <ul className="recon-notes">
+              {meta.recon.notes.map((n, i) => (
+                <li key={i}>{n}</li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
@@ -353,8 +402,11 @@ function Results({
             <span className="r-v num">{receipt.calls}</span>
           </div>
           <div className="r-item">
-            <span className="r-k">Swarm cost</span>
-            <span className="r-v accent num">{usd(receipt.totalUsd)}</span>
+            <span className="r-k">{receipt.estimated ? "Swarm cost (est.)" : "Swarm cost"}</span>
+            <span className="r-v accent num">
+              {receipt.estimated ? "≈ " : ""}
+              {usd(receipt.totalUsd)}
+            </span>
           </div>
           <div className="r-item">
             <span className="r-k">Tokens in</span>
@@ -365,7 +417,9 @@ function Results({
             <span className="r-v num">{receipt.completionTokens.toLocaleString()}</span>
           </div>
           <span className="r-tag num">
-            real spend, straight from the gateway — a full swarm audit costs cents
+            {receipt.estimated
+              ? "estimated from token usage — a full multi-model audit costs cents"
+              : "real spend, straight from the gateway — a full audit costs cents"}
           </span>
         </div>
 

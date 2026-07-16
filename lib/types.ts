@@ -1,4 +1,5 @@
-// Shared types for the Flex audit engine.
+// Shared types for the Auditora audit engine.
+import type { Recon } from "./recon";
 
 export type Mode = "contract" | "code" | "question";
 
@@ -39,11 +40,12 @@ export interface MergedFinding {
   consensus: Consensus;
 }
 
-/** Real spend for one model call, as accounted by the gateway. */
+/** Spend for one model call. `estimated` = derived from tokens, not gateway-exact. */
 export interface CallCost {
   usd: number;
   promptTokens: number;
   completionTokens: number;
+  estimated?: boolean;
 }
 
 /** The honest cost receipt for a whole swarm run. */
@@ -52,6 +54,8 @@ export interface Receipt {
   totalUsd: number;
   promptTokens: number;
   completionTokens: number;
+  /** True when any call's cost was estimated from tokens rather than gateway-exact. */
+  estimated: boolean;
 }
 
 export type PostureLevel = "clean" | "no-consensus" | "corroborated";
@@ -100,6 +104,7 @@ export interface AuditResult {
     refereeModel: string;
     bytecodeMode: boolean;
     source: SourceMeta;
+    recon?: Recon;
     attestation?: AttestationInfo;
     attestError?: string;
   };

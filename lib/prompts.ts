@@ -63,14 +63,31 @@ ${SEVERITY_GUIDE}
 ${JSON_SHAPE}`;
 }
 
-export function auditorUserPrompt(mode: Mode, input: string): string {
+const SEVERITY_GROUNDING = `SEVERITY MUST REFLECT LIVE EXPLOITABILITY, not just the code pattern:
+- A privileged/withdraw/upgrade bug is more severe when the on-chain context shows funds are actually held
+  AND the owner is a single EOA (a compromised key drains it now). Escalate toward critical/high.
+- The SAME bug is less severe when the contract holds nothing and ownership is renounced or a multisig.
+  Say so and de-escalate — do not cry "critical" on a contract that holds 0 and has no live admin.
+- When you use a live fact to set severity, STATE the fact in the description
+  (e.g. "the contract currently holds 12.4 MON and owner is an EOA, so this is drainable today").
+- Never invent on-chain facts beyond those provided in the context block.`;
+
+export function auditorUserPrompt(
+  mode: Mode,
+  input: string,
+  context?: string
+): string {
   const label =
     mode === "contract"
       ? "Contract to review (Solidity source or compiled 0x… bytecode)"
       : mode === "code"
         ? "Code"
         : "Question";
-  return `${label} to review:\n\n${input}`;
+  const ctx =
+    context && mode === "contract"
+      ? `${context}\n\n${SEVERITY_GROUNDING}\n\n`
+      : "";
+  return `${ctx}${label} to review:\n\n${input}`;
 }
 
 /** The referee clusters the same vulnerability reported by different auditors. */

@@ -24,14 +24,16 @@ function coerceFindings(raw: string): RawFinding[] {
   });
 }
 
-/** Fan the same input out to every auditor in parallel; one failure never kills the run. */
+/** Fan the same input out to every auditor in parallel; one failure never kills the run.
+ *  `context` carries the agent's on-chain recon so severity reflects live exploitability. */
 export async function runAuditors(
   models: string[],
   mode: Mode,
-  input: string
+  input: string,
+  context?: string
 ): Promise<AuditorResult[]> {
   const system = auditorSystemPrompt(mode);
-  const user = auditorUserPrompt(mode, input);
+  const user = auditorUserPrompt(mode, input, context);
 
   const settled = await Promise.allSettled(
     models.map((model) =>

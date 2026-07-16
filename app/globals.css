@@ -419,3 +419,37 @@ section[id] { scroll-margin-top: var(--nav-h); }
   .navlink.hide-sm { display: none; }
   .finding-body { padding-left: 20px; }
 }
+
+/* ---------- On-chain recon panel ---------- */
+.recon {
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 16px;
+  background: linear-gradient(180deg, var(--surface), var(--bg-2));
+}
+.recon-head {
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.recon-sub { font-size: 12px; color: var(--text-3); font-family: var(--font-mono); }
+.recon-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+}
+.recon-item {
+  border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
+  background: var(--bg-2); display: flex; flex-direction: column; gap: 4px;
+}
+.recon-k { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-3); }
+.recon-v { font-size: 14px; color: var(--text-1); font-weight: 500; }
+.recon-v.num { font-family: var(--font-num); }
+.recon-eoa { color: var(--sev-high); }
+.recon-renounced { color: var(--accent); }
+.recon-multisig { color: var(--sev-low); }
+.recon-notes {
+  margin: 14px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px;
+}
+.recon-notes li { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+@media (max-width: 720px) {
+  .recon-grid { grid-template-columns: repeat(2, 1fr); }
+}

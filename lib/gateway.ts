@@ -58,10 +58,20 @@ export interface ChatResult {
   model: string;
 }
 
+// Per-1M-token prices (USD) used to ESTIMATE cost when the gateway doesn't
+// return exact accounting (e.g. DeepSeek's direct API). Configurable so the
+// number stays honest if prices move. Defaults ~ DeepSeek deepseek-chat.
+function priceIn(): number {
+  return parseFloat(process.env.AUDITORA_PRICE_IN_PER_M || "0.27");
+}
+function priceOut(): number {
+  return parseFloat(process.env.AUDITORA_PRICE_OUT_PER_M || "1.10");
+}
+
 /**
- * One chat call through OpenRouter, capturing content and real spend.
- * `usage: {include: true}` asks OpenRouter to attach the exact USD cost
- * of the call to the response body — real numbers, not estimates.
+ * One chat call through the gateway, capturing content and spend.
+ * OpenRouter returns exact USD via `usage.cost`; when a gateway omits it
+ * (DeepSeek direct), we estimate from token counts and flag it as estimated.
  */
 export async function chat(
   model: string,
@@ -69,7 +79,7 @@ export async function chat(
   opts: { temperature?: number; maxTokens?: number } = {}
 ): Promise<ChatResult> {
   const client = getClient();
-  if (!client) throw new Error("No OPENROUTER_API_KEY set");
+  if (!client) throw new Error("No gateway API key set");
 
   const data = await client.chat.completions.create({
     model,
@@ -83,13 +93,17 @@ export async function chat(
   } as any);
 
   const usage = (data as any).usage ?? {};
+  const promptTokens = usage.prompt_tokens ?? 0;
+  const completionTokens = usage.completion_tokens ?? 0;
+
+  const exact = typeof usage.cost === "number" && usage.cost > 0;
+  const usd = exact
+    ? usage.cost
+    : (promptTokens / 1e6) * priceIn() + (completionTokens / 1e6) * priceOut();
+
   return {
     content: data.choices[0]?.message?.content ?? "",
-    cost: {
-      usd: typeof usage.cost === "number" ? usage.cost : 0,
-      promptTokens: usage.prompt_tokens ?? 0,
-      completionTokens: usage.completion_tokens ?? 0,
-    },
+    cost: { usd, promptTokens, completionTokens, estimated: !exact },
     model,
   };
 }
