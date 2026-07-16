@@ -4,15 +4,20 @@ import type { CallCost } from "./types";
 export const GATEWAY_BASE_URL =
   process.env.GATEWAY_BASE_URL || "https://openrouter.ai/api/v1";
 
+/** Gateway key — OpenRouter, DeepSeek direct, or any OpenAI-compatible endpoint. */
+function apiKey(): string | undefined {
+  return process.env.GATEWAY_API_KEY || process.env.OPENROUTER_API_KEY;
+}
+
 /** Returns a configured client, or null when no key is set (→ mock mode). */
 export function getClient(): OpenAI | null {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) return null;
+  const key = apiKey();
+  if (!key) return null;
   return new OpenAI({
-    apiKey,
+    apiKey: key,
     baseURL: GATEWAY_BASE_URL,
     defaultHeaders: {
-      // OpenRouter attribution headers (optional, improves rate limits)
+      // OpenRouter attribution headers (optional there, harmless elsewhere)
       "HTTP-Referer": process.env.AUDITORA_PUBLIC_URL || "http://localhost:3000",
       "X-Title": "Auditora",
     },
@@ -20,12 +25,14 @@ export function getClient(): OpenAI | null {
 }
 
 export function hasKey(): boolean {
-  return Boolean(process.env.OPENROUTER_API_KEY);
+  return Boolean(apiKey());
 }
 
-/** Map an OpenRouter model slug ("openai/gpt-4.1") to its provider, for display. */
+/** Map a model slug to its provider, for display — handles OpenRouter-style
+ *  "vendor/model" slugs and bare direct-API slugs like "deepseek-chat". */
 export function providerOf(model: string): string {
-  const prefix = model.split("/")[0]?.toLowerCase() ?? "";
+  const m = model.toLowerCase();
+  const prefix = m.split("/")[0] ?? "";
   const NAMES: Record<string, string> = {
     openai: "OpenAI",
     anthropic: "Anthropic",
@@ -37,7 +44,12 @@ export function providerOf(model: string): string {
     "x-ai": "xAI",
     moonshotai: "Moonshot",
   };
-  return NAMES[prefix] || prefix || "unknown";
+  if (NAMES[prefix]) return NAMES[prefix];
+  if (m.startsWith("deepseek")) return "DeepSeek";
+  if (m.startsWith("gpt") || m.startsWith("o1") || m.startsWith("o3")) return "OpenAI";
+  if (m.startsWith("gemini")) return "Google";
+  if (m.startsWith("qwen")) return "Qwen";
+  return prefix || "unknown";
 }
 
 export interface ChatResult {
