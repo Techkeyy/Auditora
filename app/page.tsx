@@ -60,11 +60,10 @@ export default function Home() {
       <header className="hero">
         <div className="hero-art" aria-hidden="true" />
         <div className="wrap">
-          <div className="eyebrow">The audit layer of Monad · chain-aware, adversarially reviewed, anchored</div>
+          <div className="eyebrow">Chain-aware · adversarially reviewed · anchored onchain</div>
           <h1>
-            Paste any Monad address.<br />
-            Auditora reads the chain.<br />
-            <em>The verdict goes onchain.</em>
+            The audit layer<br />
+            of <em>Monad</em>.
           </h1>
           <p className="lede">
             A single AI misses things and says nothing. Auditora first reads the{" "}

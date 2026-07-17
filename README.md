@@ -1,6 +1,6 @@
 # Auditora — the audit layer of Monad
 
-**Paste any Monad contract address → three independent AI auditors review the real deployed code → the consensus verdict is attested onchain, bound to the contract's codehash.**
+**Paste any Monad contract address → a review board of AI agents (Scout, Auditor, Challenger, Judge) reviews the real deployed code → the verdict that survives adversarial challenge is attested onchain, bound to the contract's codehash.**
 
 Built for the **Spark Hackathon 2026** (BuildAnything · Monad).
 
@@ -15,50 +15,54 @@ I audit contracts constantly — before bug bounties, before integrating a proto
 
 ## The solution
 
-Auditora fixes both halves:
+Auditora fixes both halves with a **review board of agents that have different jobs** — not a vote of identical models:
 
-- **The swarm.** Your contract — or the real code resolved from a bare Monad address — goes to **three models from three providers at once**; a fourth-family referee merges duplicates and records who flagged what. Only findings corroborated by **2+ independent models** count. Disagreement is the signal.
-- **The registry.** The verdict is hashed and attested to `AuditoraRegistry` on Monad, bound to the target's `EXTCODEHASH` at audit time. Anyone can look up any address — and if the code at that address ever changes, the attestation **goes stale automatically**. No trust in us required.
-- **The business model, onchain.** `requestAudit(target)` takes a small MON fee and queues any deployed contract for a swarm audit; fulfillment marks the request done in the same attestation. Pay-per-audit, no accounts.
+- **Scout** reads the live chain around the address *before* any code is judged: who controls it (owner + whether it's an EOA, multisig, or renounced), what it holds (native funds at risk), and — for a proxy — where the real logic lives. Context decides whether a bug is theory or a live drain.
+- **Auditor** reviews the real deployed code *with Scout's evidence* and proposes candidate findings — accusations, not yet verdicts.
+- **Challenger** is the adversary. It runs on a stronger reasoning model and tries to *break* every finding: **upholds** what it can't refute, **disputes** the unproven, **rejects** false positives — and catches what the Auditor missed. A wrong rejection is treated as the worst outcome, so it only rejects with an airtight refutation.
+- **Judge** is deterministic. A finding's status follows mechanically from the Challenger's verdict (upheld → confirmed, disputed → contested, rejected → dismissed). **Prose never sets the verdict** — this is the anti-inflation rail.
+- **Notary** hashes the verdict and attests it to `AuditoraRegistry` on Monad, bound to the target's `EXTCODEHASH`. Anyone can look up any address — and if the code ever changes, the attestation **goes stale automatically**. No trust in us required.
+- **Business model, onchain.** `requestAudit(target)` takes a small MON fee and queues any deployed contract for review; fulfillment marks the request done in the same attestation. Pay-per-audit, no accounts.
 
 ## How to read a result
 
-| Verdict | Meaning | Trust |
+| Status | Meaning | Trust |
 | --- | --- | --- |
-| **Corroborated** | flagged by 2+ auditors independently | real risk — act on it |
-| **Unverified (lone)** | one model only | a lead to check, or noise — collapsed by default |
-| **No consensus** | nothing corroborated | on sound code, the expected result |
+| **Confirmed** | survived the Challenger's attack | real risk — act on it |
+| **Disputed** | the Challenger couldn't fully confirm or kill it | a lead to check |
+| **Rejected** | the Challenger proved it a false positive | auditors raised it, adversary knocked it down |
 
-An attestation records exactly what the swarm concluded and when. It is **not** a certificate of safety — models can share blind spots. Auditora is a first-pass triage layer, loudest exactly where it should be: when the auditors disagree.
+An attestation records exactly what the board concluded and when. It is **not** a certificate of safety — models can still share blind spots. Auditora is a first-pass triage layer, loudest exactly where it should be: on the findings that survive attack.
 
 ## Architecture
 
 ```
 0x… address on Monad
    │
-   ▼  resolve REAL code — verified source (Etherscan V2) or deployed bytecode (RPC)
+   ▼  SCOUT — read the live chain: owner + type, funds at risk, proxy→implementation,
+   │          verified status. (Etherscan V2 + Monad RPC.) Audit targets the impl for proxies.
    │
-   ├─►  auditor A (OpenAI)   ┐
-   ├─►  auditor B (Google)   ├─ parallel, via one OpenRouter key
-   └─►  auditor C (DeepSeek) ┘
+   ▼  AUDITOR — real code + Scout's evidence → proposes candidate findings (JSON)
    │
-   ▼  structured findings (JSON) from each
+   ▼  CHALLENGER (stronger reasoning model) — attacks each finding: upheld / disputed /
+   │             rejected, + catches misses. Given the code AND the recon to verify reachability.
    │
-referee (Qwen — a 4th family)  merges duplicates, records who flagged what
+   ▼  JUDGE (deterministic) — status follows from the verdict; posture computed from status
    │
-   ▼
-verdict ──► keccak256(canonical report) ──► AuditoraRegistry.attest() on Monad
+   ▼  NOTARY — keccak256(canonical report) ──► AuditoraRegistry.attest() on Monad
 ```
 
+Agents differ by **job**, so the design is honest on any model set. On a single vendor, a fast model proposes (Auditor) and a reasoning model challenges (a real fast-proposes / deep-reasons asymmetry); with a multi-vendor gateway, each seat can be a different family.
+
 - **Contract:** [`contracts/AuditoraRegistry.sol`](contracts/AuditoraRegistry.sol) — attestations bound to codehash, paid request queue, freshness check (`latest()` returns whether the current codehash still matches).
-- **App:** Next.js (App Router) + TypeScript; chain access via viem; models via any OpenAI-compatible gateway (OpenRouter by default).
-- **Honesty rails:** posture computed from consensus data, never from model prose; bytecode-only audits are labelled low-confidence; mock runs are never attested; every run shows its real USD cost.
+- **App:** Next.js (App Router) + TypeScript; chain access via viem; models via any OpenAI-compatible gateway (OpenRouter or a direct provider like DeepSeek).
+- **Honesty rails:** status is set deterministically by the Judge from the Challenger's verdict, never by model prose; bytecode-only audits are labelled low-confidence; mock runs are never attested; every run shows its real (or token-estimated) cost.
 
 ## Getting started
 
 ```bash
 npm install
-cp .env.example .env.local        # add your OpenRouter key
+cp .env.example .env.local        # add your gateway key (OpenRouter or DeepSeek)
 
 npm run compile                   # solc → lib/registry-artifact.json
 AUDITORA_SIGNER_KEY=0x… npm run deploy   # deploy AuditoraRegistry to Monad testnet
@@ -67,15 +71,16 @@ AUDITORA_SIGNER_KEY=0x… npm run deploy   # deploy AuditoraRegistry to Monad te
 npm run dev                       # http://localhost:3000
 ```
 
-With no key set (or `AUDITORA_FORCE_MOCK=1`), Auditora runs in **mock mode** against canned data so you can explore the interface offline. Live audits of pasted source need only the OpenRouter key; auditing by address and onchain attestation need the Monad bits.
+With no key set (or `AUDITORA_FORCE_MOCK=1`), Auditora runs in **mock mode** against canned data so you can explore the interface offline. Live audits of pasted source need only the gateway key; auditing by address and onchain attestation need the Monad bits.
 
 ## Configuration
 
 | Variable | Purpose |
 | --- | --- |
-| `OPENROUTER_API_KEY` | one key for every model family (required for live audits) |
-| `AUDITORA_AUDITORS` | comma-separated auditor slugs (default: GPT-4.1, Gemini 2.5 Pro, DeepSeek) |
-| `AUDITORA_REFEREE` | reconciling model (default: Qwen3 Max — a fourth family) |
+| `GATEWAY_API_KEY` | gateway key — OpenRouter or a direct provider like DeepSeek (required for live audits). `OPENROUTER_API_KEY` also works |
+| `GATEWAY_BASE_URL` | OpenAI-compatible endpoint (OpenRouter default; e.g. `https://api.deepseek.com` for DeepSeek) |
+| `AUDITORA_AUDITORS` | comma-separated Auditor slugs that propose findings (a fast model is fine) |
+| `AUDITORA_CHALLENGER` | the adversary that judges findings — give it the **strongest reasoning model**; must differ from the Auditor. Falls back to `AUDITORA_REFEREE` |
 | `AUDITORA_CHAIN_ID` | `10143` Monad testnet (default) · `143` mainnet |
 | `AUDITORA_REGISTRY_ADDRESS` | deployed `AuditoraRegistry` address |
 | `AUDITORA_SIGNER_KEY` | attester wallet key (needs a little MON for gas) |
@@ -84,7 +89,7 @@ With no key set (or `AUDITORA_FORCE_MOCK=1`), Auditora runs in **mock mode** aga
 
 ## API
 
-- `POST /api/audit` `{mode, input}` — run the swarm; address audits on Monad are attested automatically and return the canonical report + tx hash.
+- `POST /api/audit` `{mode, input}` — run the review board; address audits on Monad are attested automatically and return the canonical report + tx hash.
 - `GET /api/registry/0x…` — every attestation for an address, with per-record freshness.
 - `GET /api/requests` — open paid audit requests from the onchain queue.
 - `POST /api/requests` `{id}` — fulfill one request: audit the target, anchor the verdict, mark it done.
