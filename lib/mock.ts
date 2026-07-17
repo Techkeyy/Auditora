@@ -84,12 +84,13 @@ export function mockAuditors(models: string[]): AuditorResult[] {
   }));
 }
 
-// Deterministic merged result for mock mode (mirrors what the referee would produce).
+// Deterministic board result for mock mode (mirrors what the Challenger + Judge
+// produce): findings raised by auditors, stress-tested, some upheld, one rejected.
 export function mockMerged(models: string[]) {
   const [m0, m1, m2] = padModels(models);
   return {
     headline:
-      "Critical reentrancy in withdraw() confirmed by all three auditors — funds are drainable. Two further issues flagged.",
+      "Reentrancy in withdraw() survived challenge — funds are drainable. One tx.origin issue disputed; a claimed overflow was rejected as a false positive.",
     findings: [
       {
         id: "F-01",
@@ -100,9 +101,14 @@ export function mockMerged(models: string[]) {
           "ETH is sent via low-level call before balances[msg.sender] is zeroed, so an attacker contract can re-enter and repeatedly withdraw until the vault is empty.",
         recommendation:
           "Apply checks-effects-interactions (zero the balance before the call) and add a reentrancy guard.",
-        modelsAgreed: [m0, m1, m2],
-        modelsTotal: 3,
-        consensus: "confirmed" as const,
+        origin: "auditor" as const,
+        auditorsClaimed: [m0, m1, m2],
+        challenge: {
+          verdict: "upheld" as const,
+          rationale:
+            "Tried to find a guard or a state update before the call — there is none; the external call precedes the balance write, so re-entry is reachable.",
+        },
+        status: "confirmed" as const,
       },
       {
         id: "F-02",
@@ -112,21 +118,31 @@ export function mockMerged(models: string[]) {
         description:
           "Privileged actions are gated by tx.origin, which is phishable: a malicious contract the owner interacts with can impersonate them.",
         recommendation: "Use msg.sender for authorization.",
-        modelsAgreed: [m0, m1],
-        modelsTotal: 3,
-        consensus: "contested" as const,
+        origin: "auditor" as const,
+        auditorsClaimed: [m0, m1],
+        challenge: {
+          verdict: "disputed" as const,
+          rationale:
+            "Real anti-pattern, but exploitation needs the owner to be phished into calling a malicious contract — conditional, so not confirmed.",
+        },
+        status: "contested" as const,
       },
       {
         id: "F-03",
-        title: "Unbounded loop in distribute()",
+        title: "Integer overflow in distribute()",
         severity: "medium" as const,
         location: "distribute()",
         description:
-          "Iterating an unbounded users array can exceed the block gas limit and permanently brick distribution.",
-        recommendation: "Switch to a pull-payment pattern or paginate.",
-        modelsAgreed: [m0],
-        modelsTotal: 3,
-        consensus: "lone" as const,
+          "One auditor claimed an unchecked arithmetic overflow when summing shares.",
+        recommendation: "—",
+        origin: "auditor" as const,
+        auditorsClaimed: [m0],
+        challenge: {
+          verdict: "rejected" as const,
+          rationale:
+            "False positive: the contract is Solidity ^0.8, where arithmetic reverts on overflow by default — the claimed path cannot occur.",
+        },
+        status: "dismissed" as const,
       },
       {
         id: "F-04",
@@ -134,11 +150,16 @@ export function mockMerged(models: string[]) {
         severity: "low" as const,
         location: "setOwner()",
         description:
-          "setOwner() does not validate the new owner; ownership can be set to address(0), locking admin functions.",
+          "setOwner() does not validate the new owner; ownership can be set to address(0), locking admin functions. Found by the Challenger, missed by the auditors.",
         recommendation: "require(newOwner != address(0)).",
-        modelsAgreed: [m2],
-        modelsTotal: 3,
-        consensus: "lone" as const,
+        origin: "challenger" as const,
+        auditorsClaimed: [],
+        challenge: {
+          verdict: "disputed" as const,
+          rationale:
+            "Caught on the Challenger's own pass; low impact and only reachable by the owner themselves, so flagged for review rather than confirmed.",
+        },
+        status: "contested" as const,
       },
     ],
   };

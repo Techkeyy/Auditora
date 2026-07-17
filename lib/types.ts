@@ -5,7 +5,11 @@ export type Mode = "contract" | "code" | "question";
 
 export type Severity = "critical" | "high" | "medium" | "low" | "info";
 
-export type Consensus = "confirmed" | "contested" | "lone";
+/** The Challenger's adversarial ruling on one finding. */
+export type ChallengeVerdict = "upheld" | "disputed" | "rejected";
+
+/** The Judge's deterministic status, derived from the Challenger's verdict. */
+export type FindingStatus = "confirmed" | "contested" | "dismissed";
 
 /** A single finding as reported by one auditor model. */
 export interface RawFinding {
@@ -26,7 +30,15 @@ export interface AuditorResult {
   cost?: CallCost;
 }
 
-/** A finding after the referee merges the same vuln across auditors. */
+/** The Challenger's ruling on a finding: does it survive an attack? */
+export interface Challenge {
+  verdict: ChallengeVerdict;
+  rationale: string;
+}
+
+/** A finding after it has been through the review board: raised by the
+ *  Auditor(s) (or the Challenger itself), attacked by the Challenger, and
+ *  given a deterministic status by the Judge. */
 export interface MergedFinding {
   id: string;
   title: string;
@@ -34,10 +46,14 @@ export interface MergedFinding {
   location: string;
   description: string;
   recommendation: string;
-  /** Which auditor models independently flagged this vuln. */
-  modelsAgreed: string[];
-  modelsTotal: number;
-  consensus: Consensus;
+  /** Who first raised it. */
+  origin: "auditor" | "challenger";
+  /** Which auditor models raised it (empty when the Challenger found it). */
+  auditorsClaimed: string[];
+  /** The Challenger's adversarial ruling. */
+  challenge: Challenge;
+  /** The Judge's deterministic call, derived from the challenge verdict. */
+  status: FindingStatus;
 }
 
 /** Spend for one model call. `estimated` = derived from tokens, not gateway-exact. */

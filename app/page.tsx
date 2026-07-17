@@ -123,7 +123,7 @@ export default function Home() {
           <div className="console-foot">
             <div className="foot-meta">
               <b>on-chain recon</b> &nbsp;→&nbsp; <b>independent model swarm</b>{" "}
-              &nbsp;→&nbsp; <b>neutral referee</b> &nbsp;→&nbsp; verdict{" "}
+              &nbsp;→&nbsp; <b>adversarial challenger</b> &nbsp;→&nbsp; verdict{" "}
               <b>anchored on Monad</b>
             </div>
             <button className="btn btn-primary" onClick={run} disabled={loading}>
@@ -198,21 +198,21 @@ export default function Home() {
               <div className="stage-top">
                 <span className="stage-node num">03</span>
               </div>
-              <h3>Reconcile &amp; triage</h3>
+              <h3>Challenge &amp; judge</h3>
               <p>
-                A neutral referee merges the same vuln across auditors and records
-                who flagged what. Agreement becomes the verdict — corroborated
-                risks rise, lone flags are quarantined.
+                An adversarial Challenger attacks every claim — upholding real bugs,
+                disputing the unproven, and rejecting false positives. A deterministic
+                Judge sets the verdict from what survived.
               </p>
               <div className="outcomes">
                 <span className="oc oc-confirmed">
-                  <span className="ocdot" />Corroborated
+                  <span className="ocdot" />Upheld
                 </span>
                 <span className="oc oc-contested">
-                  <span className="ocdot" />Contested
+                  <span className="ocdot" />Disputed
                 </span>
                 <span className="oc oc-lone">
-                  <span className="ocdot" />Lone flag
+                  <span className="ocdot" />Rejected
                 </span>
               </div>
             </div>
@@ -278,11 +278,13 @@ function Results({
 }) {
   const { findings, receipt, auditors, meta } = result;
 
-  const [showLone, setShowLone] = useState(false);
-  const corroborated = findings.filter((f) => f.consensus !== "lone");
-  const lone = findings.filter((f) => f.consensus === "lone");
+  const [showDisputed, setShowDisputed] = useState(false);
+  const [showDismissed, setShowDismissed] = useState(false);
+  const confirmed = findings.filter((f) => f.status === "confirmed");
+  const disputed = findings.filter((f) => f.status === "contested");
+  const dismissed = findings.filter((f) => f.status === "dismissed");
   const sevCount = (s: string) =>
-    corroborated.filter((f) => f.severity === s).length;
+    confirmed.filter((f) => f.severity === s).length;
 
   return (
     <div className="results">
@@ -365,10 +367,9 @@ function Results({
 
       {auditors.some((a) => a.error) && (
         <div className="banner warn" style={{ marginBottom: 16 }}>
-          <b>Degraded swarm — {auditors.filter((a) => !a.error).length} of{" "}
-          {auditors.length} auditors completed.</b> Consensus is computed only over
-          those that ran, so agreement counts are thinner than a full swarm.
-          Unavailable:{" "}
+          <b>Degraded board — {auditors.filter((a) => !a.error).length} of{" "}
+          {auditors.length} auditors completed.</b> The Challenger adjudicated only
+          the reports that ran. Unavailable:{" "}
           {auditors
             .filter((a) => a.error)
             .map((a) => `${a.model} (${a.error})`)
@@ -378,22 +379,22 @@ function Results({
       )}
 
       <div className="verdict">
-        <div className="eyebrow">Reconciled verdict</div>
+        <div className="eyebrow">Board verdict</div>
         <div className={`posture posture-${result.posture.level}`}>
           <span className="posture-dot" />
           {result.posture.line}
         </div>
         <p className="verdict-summary">
-          <span className="vs-label">Model summary</span>
+          <span className="vs-label">Challenger&apos;s summary</span>
           {result.headline}
         </p>
 
         <div className="stats">
-          <Stat k="Corroborated" v={corroborated.length} accent={corroborated.length > 0} />
+          <Stat k="Confirmed" v={confirmed.length} accent={confirmed.length > 0} />
           <Stat k="Critical" v={sevCount("critical")} />
           <Stat k="High" v={sevCount("high")} />
-          <Stat k="Medium" v={sevCount("medium")} />
-          <Stat k="Unverified" v={lone.length} muted />
+          <Stat k="Disputed" v={disputed.length} />
+          <Stat k="Rejected" v={dismissed.length} muted />
         </div>
 
         <div className="receipt">
@@ -445,22 +446,22 @@ function Results({
 
       <div className="findings-section">
         <div className="findings-head">
-          <div className="eyebrow">Corroborated findings</div>
-          <span className="findings-count num">{corroborated.length}</span>
-          {corroborated.length > 0 && (
-            <span className="findings-hint">flagged by 2+ auditors · tap to expand</span>
+          <div className="eyebrow">Confirmed findings</div>
+          <span className="findings-count num">{confirmed.length}</span>
+          {confirmed.length > 0 && (
+            <span className="findings-hint">survived the Challenger · tap to expand</span>
           )}
         </div>
 
-        {corroborated.length === 0 ? (
+        {confirmed.length === 0 ? (
           <div className="banner info">
-            {lone.length === 0
+            {disputed.length === 0 && dismissed.length === 0
               ? "No findings surfaced — nothing obvious, but that is not a proof of safety."
-              : "Nothing was flagged by 2+ auditors. On a sound contract that is the expected result — the flags below are single-model and unverified."}
+              : "Nothing survived adversarial challenge as a confirmed bug. On sound code that is the expected result — see the disputed and rejected items below."}
           </div>
         ) : (
           <div className="findings">
-            {corroborated.map((f) => (
+            {confirmed.map((f) => (
               <Finding
                 key={f.id}
                 f={f}
@@ -471,19 +472,45 @@ function Results({
           </div>
         )}
 
-        {lone.length > 0 && (
+        {disputed.length > 0 && (
           <div className="lone-section">
             <button
               className="lone-toggle"
-              onClick={() => setShowLone(!showLone)}
+              onClick={() => setShowDisputed(!showDisputed)}
             >
-              <span className="lone-chevron">{showLone ? "−" : "+"}</span>
-              {lone.length} unverified single-model flag
-              {lone.length > 1 ? "s" : ""} — likely noise, review with skepticism
+              <span className="lone-chevron">{showDisputed ? "−" : "+"}</span>
+              {disputed.length} disputed finding
+              {disputed.length > 1 ? "s" : ""} — the Challenger couldn&apos;t fully
+              confirm or kill; review these
             </button>
-            {showLone && (
+            {showDisputed && (
               <div className="findings" style={{ marginTop: 12 }}>
-                {lone.map((f) => (
+                {disputed.map((f) => (
+                  <Finding
+                    key={f.id}
+                    f={f}
+                    isOpen={!!open[f.id]}
+                    toggle={() => setOpen({ ...open, [f.id]: !open[f.id] })}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {dismissed.length > 0 && (
+          <div className="lone-section">
+            <button
+              className="lone-toggle"
+              onClick={() => setShowDismissed(!showDismissed)}
+            >
+              <span className="lone-chevron">{showDismissed ? "−" : "+"}</span>
+              {dismissed.length} rejected by the Challenger as false positive
+              {dismissed.length > 1 ? "s" : ""} — auditors raised, adversary knocked down
+            </button>
+            {showDismissed && (
+              <div className="findings" style={{ marginTop: 12 }}>
+                {dismissed.map((f) => (
                   <Finding
                     key={f.id}
                     f={f}
@@ -497,9 +524,9 @@ function Results({
         )}
       </div>
 
-      {/* the debate */}
+      {/* the debate — the auditors' raw claims, before the Challenger ruled */}
       <div className="debate">
-        <div className="eyebrow">The debate · raw auditor outputs</div>
+        <div className="eyebrow">The bench · what each auditor claimed</div>
         <div className="debate-grid">
           {auditors.map((a) => (
             <div key={a.model} className="auditor">
@@ -557,17 +584,18 @@ function Finding({
   isOpen: boolean;
   toggle: () => void;
 }) {
-  const conLabel =
-    f.consensus === "confirmed"
-      ? `Confirmed ${f.modelsAgreed.length}/${f.modelsTotal}`
-      : f.consensus === "contested"
-        ? `Contested ${f.modelsAgreed.length}/${f.modelsTotal}`
-        : `Lone flag 1/${f.modelsTotal}`;
+  // status → the badge tone (reuses the existing con-* palette).
+  const statusMap = {
+    confirmed: { cls: "con-confirmed", label: "Upheld" },
+    contested: { cls: "con-contested", label: "Disputed" },
+    dismissed: { cls: "con-lone", label: "Rejected" },
+  } as const;
+  const st = statusMap[f.status];
+  const muted = f.status === "dismissed";
 
-  const unverified = f.consensus === "lone";
   return (
     <div
-      className={`finding edge-${f.severity}${unverified ? " unverified" : ""}${
+      className={`finding edge-${f.severity}${muted ? " unverified" : ""}${
         isOpen ? " open" : ""
       }`}
     >
@@ -576,17 +604,17 @@ function Finding({
           <div className="finding-titlerow">
             <span className="finding-id num">{f.id}</span>
             <p className="finding-title">{f.title}</p>
+            {f.origin === "challenger" && (
+              <span className="origin-tag">Challenger-found</span>
+            )}
           </div>
           <span className="finding-loc">{f.location}</span>
         </div>
         <div className="finding-badges">
-          <span className={`sev sev-${f.severity}`}>
-            {f.severity}
-            {unverified && <span className="sev-unverified">unverified</span>}
-          </span>
-          <span className={`con con-${f.consensus}`}>
+          <span className={`sev sev-${f.severity}`}>{f.severity}</span>
+          <span className={`con ${st.cls}`}>
             <span className="cdot" />
-            {conLabel}
+            {st.label}
           </span>
           <span className="chevron" aria-hidden="true">
             {isOpen ? "−" : "+"}
@@ -596,17 +624,33 @@ function Finding({
       {isOpen && (
         <div className="finding-body">
           <p>{f.description}</p>
-          <div className="fix">
-            <span className="fixk">Recommended fix</span>
-            <p>{f.recommendation}</p>
-          </div>
-          <div className="agreed">
-            <span className="lbl">Flagged by</span>
-            {f.modelsAgreed.map((m) => (
-              <span key={m} className="chip on">
-                {m}
+          {f.challenge.rationale && (
+            <div className={`challenge challenge-${f.status}`}>
+              <span className="challenge-k">
+                Challenger&apos;s ruling · {st.label.toLowerCase()}
               </span>
-            ))}
+              <p>{f.challenge.rationale}</p>
+            </div>
+          )}
+          {f.status !== "dismissed" && f.recommendation && f.recommendation !== "—" && (
+            <div className="fix">
+              <span className="fixk">Recommended fix</span>
+              <p>{f.recommendation}</p>
+            </div>
+          )}
+          <div className="agreed">
+            <span className="lbl">
+              {f.origin === "challenger" ? "Raised by" : "Claimed by"}
+            </span>
+            {f.origin === "challenger" ? (
+              <span className="chip on">the Challenger</span>
+            ) : (
+              f.auditorsClaimed.map((m) => (
+                <span key={m} className="chip on">
+                  {m}
+                </span>
+              ))
+            )}
           </div>
         </div>
       )}

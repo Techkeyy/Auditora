@@ -1,6 +1,6 @@
 import { hasKey } from "./gateway";
 import { runAuditors } from "./auditors";
-import { reconcile } from "./consensus";
+import { adjudicate } from "./consensus";
 import { resolveContractInput, isAddress } from "./resolve";
 import { runRecon, reconPromptBlock } from "./recon";
 import { mockAuditors, mockMerged } from "./mock";
@@ -23,8 +23,13 @@ function auditorModels(): string[] {
     .filter(Boolean);
 }
 
-function refereeModel(): string {
-  return process.env.AUDITORA_REFEREE || "qwen/qwen3-max";
+/** The Challenger — the adversary that stress-tests the auditors' findings. */
+function challengerModel(): string {
+  return (
+    process.env.AUDITORA_CHALLENGER ||
+    process.env.AUDITORA_REFEREE ||
+    "qwen/qwen3-max"
+  );
 }
 
 function receiptFrom(costs: CallCost[]) {
@@ -64,20 +69,25 @@ function computePosture(findings: MergedFinding[]): Posture {
       line: "No issues surfaced — nothing obvious, but that is not a proof of safety.",
     };
   }
-  const corroborated = findings.filter((f) => f.consensus !== "lone");
-  const lone = findings.length - corroborated.length;
+  const confirmed = findings.filter((f) => f.status === "confirmed").length;
+  const contested = findings.filter((f) => f.status === "contested").length;
 
-  if (corroborated.length === 0) {
+  if (confirmed === 0) {
+    if (contested === 0) {
+      return {
+        level: "clean",
+        line: "Nothing survived challenge — every proposed finding was rejected by the Challenger. Not a proof of safety.",
+      };
+    }
     return {
       level: "no-consensus",
-      line: `No model consensus. All ${lone} flag${lone === 1 ? "" : "s"} come from a single model and are unverified — treat them as leads to check, not confirmed findings.`,
+      line: `No confirmed issues. ${contested} finding${contested === 1 ? "" : "s"} the Challenger could not fully rule out — treat as leads to check, not confirmed bugs.`,
     };
   }
-  const c = corroborated.length;
   return {
     level: "corroborated",
-    line: `${c} issue${c === 1 ? "" : "s"} corroborated by 2+ auditors${
-      lone ? `, plus ${lone} single-model flag${lone === 1 ? "" : "s"} to review` : ""
+    line: `${confirmed} finding${confirmed === 1 ? "" : "s"} survived adversarial challenge${
+      contested ? `, plus ${contested} disputed to review` : ""
     }.`,
   };
 }
@@ -91,7 +101,7 @@ function detectBytecode(mode: Mode, input: string): boolean {
 
 export async function runAudit(mode: Mode, input: string): Promise<AuditResult> {
   const started = Date.now();
-  const referee = refereeModel();
+  const referee = challengerModel();
 
   if (!hasKey() || forceMock()) {
     // MOCK MODE — no API key, or FLEX_FORCE_MOCK=1 (offline / demo-safety switch).
@@ -187,7 +197,12 @@ export async function runAudit(mode: Mode, input: string): Promise<AuditResult> 
     };
   }
 
-  const { findings, headline, cost: refCost } = await reconcile(referee, auditors);
+  const { findings, headline, cost: refCost } = await adjudicate(
+    referee,
+    auditors,
+    auditInput,
+    reconContext
+  );
 
   const costs: CallCost[] = [
     ...auditors.map((a) => a.cost).filter((c): c is CallCost => Boolean(c)),

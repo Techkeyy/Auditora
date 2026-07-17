@@ -41,13 +41,15 @@ export function canonicalReport(result: AuditResult, target: string): string {
     posture: result.posture.level,
     headline: result.headline,
     models: result.auditors.map((a) => a.model),
-    referee: result.meta.refereeModel,
+    challenger: result.meta.refereeModel,
     findings: result.findings.map((f) => ({
       title: f.title,
       severity: f.severity,
       location: f.location,
-      consensus: f.consensus,
-      modelsAgreed: f.modelsAgreed,
+      status: f.status,
+      verdict: f.challenge.verdict,
+      origin: f.origin,
+      auditorsClaimed: f.auditorsClaimed,
     })),
   });
 }
@@ -77,10 +79,13 @@ export async function attestAudit(
 
   const canonical = canonicalReport(result, target);
   const reportHash = reportHashOf(canonical);
+  // Onchain schema stays stable: "corroborated" = findings that SURVIVED the
+  // Challenger (confirmed), "lone" = disputed. Dismissed findings (false
+  // positives the Challenger rejected) are not attested as risks at all.
   const corroborated = result.findings.filter(
-    (f) => f.consensus !== "lone"
+    (f) => f.status === "confirmed"
   ).length;
-  const lone = result.findings.length - corroborated;
+  const lone = result.findings.filter((f) => f.status === "contested").length;
 
   const hash = await wallet.writeContract({
     address: registry,

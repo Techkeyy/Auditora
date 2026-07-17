@@ -63,7 +63,7 @@ app.get("/user", (req, res) => {
 
 export const PLACEHOLDER: Record<Mode, string> = {
   contract:
-    "Paste Solidity source — or a fully compiled contract string (0x… EVM bytecode) — to send to the audit swarm…",
+    "Paste a Monad address, Solidity source, or compiled 0x… bytecode — Auditora runs recon, the review board, and anchors the verdict…",
   code: "Paste a code snippet to review…",
   question: "Ask a technical question you're about to trust…",
 };

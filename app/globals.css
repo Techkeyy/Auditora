@@ -453,3 +453,22 @@ section[id] { scroll-margin-top: var(--nav-h); }
 @media (max-width: 720px) {
   .recon-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ---------- Challenger ruling (per-finding debate) ---------- */
+.origin-tag {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--sev-low); border: 1px solid var(--border-strong);
+  border-radius: 4px; padding: 1px 6px; margin-left: 8px; white-space: nowrap;
+}
+.challenge {
+  margin-top: 12px; border-left: 2px solid var(--border-strong);
+  padding: 8px 0 8px 14px; background: var(--bg-2); border-radius: 0 8px 8px 0;
+}
+.challenge-k {
+  display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--text-3); margin-bottom: 4px;
+}
+.challenge p { margin: 0; font-size: 13px; color: var(--text-2); line-height: 1.5; }
+.challenge-confirmed { border-left-color: var(--con-confirmed); }
+.challenge-contested { border-left-color: var(--con-contested); }
+.challenge-dismissed { border-left-color: var(--con-lone); }
