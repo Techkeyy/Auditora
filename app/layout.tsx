@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Auditora — the audit layer of Monad",
   description:
-    "Paste any Monad contract address: three independent AI auditors review the real deployed code, a referee reconciles them, and the consensus verdict is attested onchain — bound to the contract's codehash. A public audit registry anyone can check.",
+    "Give it a Monad address or paste the contract: a review board of AI agents reads the chain, an Auditor proposes findings, an adversarial Challenger breaks the weak ones, and the surviving verdict is attested onchain — bound to the contract's codehash. A public audit registry anyone can check.",
 };
 
 export default function RootLayout({

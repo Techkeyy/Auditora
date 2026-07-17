@@ -66,13 +66,9 @@ export default function Home() {
             of <em>Monad</em>.
           </h1>
           <p className="lede">
-            A single AI misses things and says nothing. Auditora first reads the{" "}
-            <b>live chain</b> around an address — who controls it, what it holds,
-            where a proxy really points — then runs the <b>real deployed code</b>{" "}
-            past a <b>review board of agents</b>: an Auditor proposes findings, an
-            adversarial <b>Challenger</b> tries to break each one, and only what
-            survives is anchored to a <b>public onchain registry</b> bound to the
-            contract&apos;s codehash. Anyone can check any address, forever.
+            Give it a Monad address or paste the contract. A board of{" "}
+            <b>AI agents</b> reads the chain, argues over the code, and writes the{" "}
+            <b>surviving verdict onchain</b> — checkable by anyone, forever.
           </p>
         </div>
       </header>
@@ -401,7 +397,7 @@ function Results({
 
         <div className="receipt">
           <div className="r-item">
-            <span className="r-k">Models called</span>
+            <span className="r-k">Agent calls</span>
             <span className="r-v num">{receipt.calls}</span>
           </div>
           <div className="r-item">
@@ -421,7 +417,7 @@ function Results({
           </div>
           <span className="r-tag num">
             {receipt.estimated
-              ? "estimated from token usage — a full multi-model audit costs cents"
+              ? "estimated from token usage — a full board audit costs cents"
               : "real spend, straight from the gateway — a full audit costs cents"}
           </span>
         </div>

@@ -136,7 +136,7 @@ export async function runAudit(mode: Mode, input: string): Promise<AuditResult> 
   // For contract mode with a bare address, the agent first runs on-chain recon:
   // it learns who controls the code, what it holds, and — for a proxy — where the
   // real logic lives. The audit then targets the implementation, and the recon
-  // evidence is handed to the swarm so severity reflects live exploitability.
+  // evidence is handed to the board so severity reflects live exploitability.
   let auditInput = input;
   let source: SourceMeta = { kind: "inline" };
   let recon: Awaited<ReturnType<typeof runRecon>> | undefined;
@@ -159,6 +159,31 @@ export async function runAudit(mode: Mode, input: string): Promise<AuditResult> 
     source = resolved.source;
     if (recon?.isProxy && recon.implementation) {
       source = { ...source, note: `${source.note ?? ""} (proxy at ${recon.address} → implementation ${recon.implementation})`.trim() };
+    }
+
+    // Short-circuit: if the address has no code, there is nothing to audit.
+    // Don't spend model calls or print a "verdict" on an empty EOA / wrong-network
+    // address — stop at recon and say so plainly.
+    if (isAddress(input) && recon && !recon.isContract) {
+      return {
+        mode,
+        headline: "No contract code at this address — nothing to audit.",
+        posture: {
+          level: "clean",
+          line: `No code found at ${recon.address} on ${recon.chainName}. It may be a wallet (EOA), self-destructed, or deployed on the other Monad network — the review board was not run.`,
+        },
+        findings: [],
+        auditors: [],
+        receipt: receiptFrom([]),
+        meta: {
+          durationMs: Date.now() - started,
+          usedMock: false,
+          refereeModel: referee,
+          bytecodeMode: false,
+          source,
+          recon,
+        },
+      };
     }
   }
 
