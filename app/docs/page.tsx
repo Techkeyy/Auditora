@@ -13,7 +13,7 @@ export default function Docs() {
         <h1>How Auditora works</h1>
         <p className="lead">
           Auditora turns a single, over-confident AI answer into a reconciled verdict
-          from a swarm of independent models — then anchors that verdict to a public
+          from a board of specialist agents — then anchors that verdict to a public
           registry on Monad, bound to the contract&apos;s codehash. This page explains
           the mechanism, the honesty model, and the onchain layer.
         </p>
@@ -145,7 +145,7 @@ verdict  ──►  keccak256(report)  ──►  AuditoraRegistry.attest() on M
           professional audit and not a safety stamp. Three models trained on
           overlapping data can share a blind spot and all miss the same bug — so
           &ldquo;no findings&rdquo; means &ldquo;nothing obvious surfaced,&rdquo; never
-          &ldquo;proven safe.&rdquo; An attestation records exactly what the swarm
+          &ldquo;proven safe.&rdquo; An attestation records exactly what the board
           concluded and when — it is not a certificate.
         </p>
         <p>
@@ -163,7 +163,7 @@ verdict  ──►  keccak256(report)  ──►  AuditoraRegistry.attest() on M
             Address audits are attested onchain.
           </li>
           <li>
-            <strong>Code review</strong> — the same swarm pointed at a general code
+            <strong>Code review</strong> — the same board pointed at a general code
             snippet for bugs and security issues.
           </li>
           <li>

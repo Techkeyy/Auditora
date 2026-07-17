@@ -60,7 +60,7 @@ export default function Home() {
       <header className="hero">
         <div className="hero-art" aria-hidden="true" />
         <div className="wrap">
-          <div className="eyebrow">The audit layer of Monad · chain-aware, consensus-verified, anchored</div>
+          <div className="eyebrow">The audit layer of Monad · chain-aware, adversarially reviewed, anchored</div>
           <h1>
             Paste any Monad address.<br />
             Auditora reads the chain.<br />
@@ -69,10 +69,11 @@ export default function Home() {
           <p className="lede">
             A single AI misses things and says nothing. Auditora first reads the{" "}
             <b>live chain</b> around an address — who controls it, what it holds,
-            where a proxy really points — then puts the <b>real deployed code</b> to
-            a <b>swarm of independent models</b>, reconciles their findings, and
-            anchors the consensus verdict to a <b>public onchain registry</b> bound
-            to the contract&apos;s codehash. Anyone can check any address, forever.
+            where a proxy really points — then runs the <b>real deployed code</b>{" "}
+            past a <b>review board of agents</b>: an Auditor proposes findings, an
+            adversarial <b>Challenger</b> tries to break each one, and only what
+            survives is anchored to a <b>public onchain registry</b> bound to the
+            contract&apos;s codehash. Anyone can check any address, forever.
           </p>
         </div>
       </header>
@@ -122,8 +123,8 @@ export default function Home() {
 
           <div className="console-foot">
             <div className="foot-meta">
-              <b>on-chain recon</b> &nbsp;→&nbsp; <b>independent model swarm</b>{" "}
-              &nbsp;→&nbsp; <b>adversarial challenger</b> &nbsp;→&nbsp; verdict{" "}
+              <b>on-chain recon</b> &nbsp;→&nbsp; <b>auditor</b> &nbsp;→&nbsp;{" "}
+              <b>adversarial challenger</b> &nbsp;→&nbsp; verdict{" "}
               <b>anchored on Monad</b>
             </div>
             <button className="btn btn-primary" onClick={run} disabled={loading}>
@@ -136,8 +137,9 @@ export default function Home() {
         {loading && (
           <div className="banner info">
             <span className="spinner" />
-            Running on-chain recon, fanning out to the model swarm, reconciling
-            the findings, and anchoring the verdict… this takes a few seconds.
+            Running on-chain recon, the Auditor is proposing findings, the
+            Challenger is attacking them, and the verdict is being anchored… this
+            takes a few seconds.
           </div>
         )}
 
@@ -181,16 +183,16 @@ export default function Home() {
               <div className="stage-top">
                 <span className="stage-node num">02</span>
               </div>
-              <h3>Fan out</h3>
+              <h3>Auditor proposes</h3>
               <p>
-                The real code plus that on-chain context hits several independent
-                models at once. Diverse models catch different bugs; each returns
-                structured findings.
+                The real code plus that on-chain context goes to the Auditor, which
+                proposes candidate findings as structured claims — every one of them
+                still just an accusation, not yet a verdict.
               </p>
               <div className="fan">
-                <span className="fanchip">independent</span>
-                <span className="fanchip">model</span>
-                <span className="fanchip">swarm</span>
+                <span className="fanchip">reads code</span>
+                <span className="fanchip">+ context</span>
+                <span className="fanchip">proposes</span>
               </div>
             </div>
 
@@ -237,10 +239,11 @@ export default function Home() {
             <div className="eyebrow">The honest part</div>
             <p>
               Auditora is a first-pass triage layer, not a substitute for a professional
-              audit. Agreement between models is a strong signal, not a proof of
-              safety — models can share blind spots. An attestation records exactly
-              what the swarm concluded and when — it is not a certificate of safety.
-              Auditora is loudest exactly where it should be: when the auditors disagree.
+              audit. Surviving an adversarial challenge is a strong signal, not a
+              proof of safety — models can still share blind spots. An attestation
+              records exactly what the board concluded and when — it is not a
+              certificate of safety. Auditora is loudest exactly where it should be:
+              on the findings that survive attack.
             </p>
           </div>
         </div>
@@ -403,7 +406,7 @@ function Results({
             <span className="r-v num">{receipt.calls}</span>
           </div>
           <div className="r-item">
-            <span className="r-k">{receipt.estimated ? "Swarm cost (est.)" : "Swarm cost"}</span>
+            <span className="r-k">{receipt.estimated ? "Board cost (est.)" : "Board cost"}</span>
             <span className="r-v accent num">
               {receipt.estimated ? "≈ " : ""}
               {usd(receipt.totalUsd)}
