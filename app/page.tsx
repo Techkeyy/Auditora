@@ -12,12 +12,6 @@ const MODE_LABELS: Record<Mode, string> = {
   question: "Question",
 };
 
-function usd(n: number): string {
-  if (n === 0) return "$0";
-  if (n < 0.01) return `$${n.toFixed(4)}`;
-  return `$${n.toFixed(2)}`;
-}
-
 export default function Home() {
   const [mode, setMode] = useState<Mode>("contract");
   const [input, setInput] = useState("");
@@ -138,7 +132,7 @@ export default function Home() {
           </div>
         )}
 
-        {result && <Results result={result} open={open} setOpen={setOpen} usd={usd} />}
+        {result && <Results result={result} open={open} setOpen={setOpen} />}
       </section>
 
       {/* REGISTRY LOOKUP */}
@@ -267,14 +261,12 @@ function Results({
   result,
   open,
   setOpen,
-  usd,
 }: {
   result: AuditResult;
   open: Record<string, boolean>;
   setOpen: (o: Record<string, boolean>) => void;
-  usd: (n: number) => string;
 }) {
-  const { findings, receipt, auditors, meta } = result;
+  const { findings, auditors, meta } = result;
 
   const [showDisputed, setShowDisputed] = useState(false);
   const [showDismissed, setShowDismissed] = useState(false);
@@ -393,33 +385,6 @@ function Results({
           <Stat k="High" v={sevCount("high")} />
           <Stat k="Disputed" v={disputed.length} />
           <Stat k="Rejected" v={dismissed.length} muted />
-        </div>
-
-        <div className="receipt">
-          <div className="r-item">
-            <span className="r-k">Agent calls</span>
-            <span className="r-v num">{receipt.calls}</span>
-          </div>
-          <div className="r-item">
-            <span className="r-k">{receipt.estimated ? "Board cost (est.)" : "Board cost"}</span>
-            <span className="r-v accent num">
-              {receipt.estimated ? "≈ " : ""}
-              {usd(receipt.totalUsd)}
-            </span>
-          </div>
-          <div className="r-item">
-            <span className="r-k">Tokens in</span>
-            <span className="r-v num">{receipt.promptTokens.toLocaleString()}</span>
-          </div>
-          <div className="r-item">
-            <span className="r-k">Tokens out</span>
-            <span className="r-v num">{receipt.completionTokens.toLocaleString()}</span>
-          </div>
-          <span className="r-tag num">
-            {receipt.estimated
-              ? "estimated from token usage — a full board audit costs cents"
-              : "real spend, straight from the gateway — a full audit costs cents"}
-          </span>
         </div>
 
         {meta.attestation && (

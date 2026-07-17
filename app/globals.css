@@ -246,17 +246,6 @@ section[id] { scroll-margin-top: var(--nav-h); }
 .lone-toggle:hover { color: var(--text-2); border-color: var(--con-lone); }
 .lone-chevron { font-family: var(--font-num); font-size: 15px; width: 14px; text-align: center; color: var(--con-lone); }
 
-/* receipt strip */
-.receipt {
-  margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 18px;
-  border: 1px solid var(--accent-border); background: var(--accent-dim);
-  border-radius: 10px; padding: 14px 18px;
-}
-.receipt .r-item { display: flex; flex-direction: column; gap: 2px; }
-.receipt .r-k { font-family: var(--font-num); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-3); }
-.receipt .r-v { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 16px; color: var(--text-1); }
-.receipt .r-v.accent { color: var(--accent); }
-.receipt .r-tag { margin-left: auto; font-family: var(--font-num); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
 
 /* findings */
 .findings-section { margin-top: 34px; }

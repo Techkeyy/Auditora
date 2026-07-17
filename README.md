@@ -56,7 +56,7 @@ Agents differ by **job**, so the design is honest on any model set. On a single 
 
 - **Contract:** [`contracts/AuditoraRegistry.sol`](contracts/AuditoraRegistry.sol) — attestations bound to codehash, paid request queue, freshness check (`latest()` returns whether the current codehash still matches).
 - **App:** Next.js (App Router) + TypeScript; chain access via viem; models via any OpenAI-compatible gateway (OpenRouter or a direct provider like DeepSeek).
-- **Honesty rails:** status is set deterministically by the Judge from the Challenger's verdict, never by model prose; bytecode-only audits are labelled low-confidence; mock runs are never attested; every run shows its real (or token-estimated) cost.
+- **Honesty rails:** status is set deterministically by the Judge from the Challenger's verdict, never by model prose; bytecode-only audits are labelled low-confidence; mock runs are never attested; addresses with no code short-circuit before the board runs.
 
 ## Getting started
 
