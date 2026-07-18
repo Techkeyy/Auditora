@@ -81,16 +81,23 @@ export async function chat(
   const client = getClient();
   if (!client) throw new Error("No gateway API key set");
 
-  const data = await client.chat.completions.create({
-    model,
-    messages,
-    temperature: opts.temperature ?? 0.1,
-    // Headroom so reasoning models don't burn the budget before emitting,
-    // and so long findings JSON is never truncated.
-    max_tokens: opts.maxTokens ?? 4096,
-    // OpenRouter extension: return exact usage accounting on the response.
-    usage: { include: true },
-  } as any);
+  // Per-call timeout: a hung model call must fail fast so the route can return a
+  // clean JSON error instead of stalling until the platform kills the request.
+  const timeoutMs = Number(process.env.AUDITORA_CALL_TIMEOUT_MS || 90000);
+
+  const data = await client.chat.completions.create(
+    {
+      model,
+      messages,
+      temperature: opts.temperature ?? 0.1,
+      // Headroom so reasoning models don't burn the budget before emitting,
+      // and so long findings JSON is never truncated.
+      max_tokens: opts.maxTokens ?? 4096,
+      // OpenRouter extension: return exact usage accounting on the response.
+      usage: { include: true },
+    } as any,
+    { timeout: timeoutMs }
+  );
 
   const usage = (data as any).usage ?? {};
   const promptTokens = usage.prompt_tokens ?? 0;

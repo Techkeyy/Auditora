@@ -34,11 +34,22 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mode, input }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Audit failed.");
+      // Read as text first: a timeout or platform error returns an HTML/text
+      // page, not JSON, and blindly calling res.json() would throw a cryptic
+      // "Unexpected token" instead of a useful message.
+      const raw = await res.text();
+      let data: (AuditResult & { error?: string }) | { error?: string };
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        throw new Error(
+          "The audit didn't return a readable result — a full board review can take up to a minute and the request may have timed out. Try again."
+        );
+      }
+      if (!res.ok) throw new Error(("error" in data && data.error) || "Audit failed.");
       setResult(data as AuditResult);
-      // auto-open the top finding
-      if (data.findings?.[0]) setOpen({ [data.findings[0].id]: true });
+      if ((data as AuditResult).findings?.[0])
+        setOpen({ [(data as AuditResult).findings[0].id]: true });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Audit failed.");
     } finally {
@@ -127,8 +138,8 @@ export default function Home() {
           <div className="banner info">
             <span className="spinner" />
             Running on-chain recon, the Auditor is proposing findings, the
-            Challenger is attacking them, and the verdict is being anchored… this
-            takes a few seconds.
+            Challenger is attacking them, and the verdict is being anchored. A full
+            board review can take up to a minute — the reasoning model is thorough.
           </div>
         )}
 
