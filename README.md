@@ -4,6 +4,10 @@
 
 Built for the **Spark Hackathon 2026** (BuildAnything · Monad).
 
+**Live:** https://auditora-2ocv.vercel.app · **Registry (Monad testnet):** [`0x81e8b82760b07a3224e0e528719b390fa28b0380`](https://testnet.monadexplorer.com/address/0x81e8b82760b07a3224e0e528719b390fa28b0380)
+
+**Try it:** paste `0x51fb915e67ad45165c844b8a4fad9e53eb819f61` — a live testnet contract that holds funds, is owned by an EOA, and has real bugs. Watch recon read the chain, the board confirm the drainable ones and reject a false positive, and the verdict land onchain.
+
 ---
 
 ## The problem (mine, specifically)
@@ -65,8 +69,9 @@ npm install
 cp .env.example .env.local        # add your gateway key (OpenRouter or DeepSeek)
 
 npm run compile                   # solc → lib/registry-artifact.json
-AUDITORA_SIGNER_KEY=0x… npm run deploy   # deploy AuditoraRegistry to Monad testnet
-# put the printed address in .env.local as AUDITORA_REGISTRY_ADDRESS
+npm run deploy                     # deploy AuditoraRegistry to Monad testnet
+# reads AUDITORA_SIGNER_KEY from .env.local; put the printed address back as
+# AUDITORA_REGISTRY_ADDRESS
 
 npm run dev                       # http://localhost:3000
 ```

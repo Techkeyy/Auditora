@@ -29,7 +29,7 @@ async function etherscan(
  *  - raw Solidity,
  *  - a JSON sources map `{ "F.sol": { content } }` (legacy multi-file), or
  *  - a standard-json-input blob wrapped in an extra pair of braces `{{ ... }}`.
- * Flatten any of them into a single readable Solidity string for the swarm.
+ * Flatten any of them into a single readable Solidity string for the board.
  */
 function flattenSource(sourceCode: string): string {
   const s = sourceCode.trim();
@@ -88,7 +88,7 @@ function bytecodeResult(
 /**
  * If the input is a bare contract address, fetch its REAL code from Monad —
  * verified source via the explorer when possible, raw deployed bytecode via
- * RPC otherwise — so the swarm audits actual code instead of being quizzed
+ * RPC otherwise — so the board audits actual code instead of being quizzed
  * on whether it remembers the address. Non-addresses pass through as "inline".
  */
 export async function resolveContractInput(input: string): Promise<Resolved> {
@@ -135,7 +135,7 @@ export async function resolveContractInput(input: string): Promise<Resolved> {
           ...base,
           kind: "address-source",
           contractName: name,
-          note: `Verified source fetched from ${chain}${name ? ` — ${name}` : ""}. The swarm audited the real code, not a guess from the address.`,
+          note: `Verified source fetched from ${chain}${name ? ` — ${name}` : ""}. The board audited the real code, not a guess from the address.`,
         },
       };
     }

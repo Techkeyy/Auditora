@@ -36,7 +36,7 @@ export interface Recon {
   /** Native MON currently held — the funds actually at risk. */
   balanceWei: string;
   balanceEth: string;
-  /** Human-readable evidence lines the agent will hand to the swarm + the UI. */
+  /** Human-readable evidence lines the agent will hand to the board + the UI. */
   notes: string[];
 }
 

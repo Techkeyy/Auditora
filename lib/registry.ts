@@ -63,7 +63,7 @@ export interface AttestOutcome {
   canonical: string;
 }
 
-/** Anchor a swarm verdict for `target` on the Monad registry. */
+/** Anchor a board verdict for `target` on the Monad registry. */
 export async function attestAudit(
   result: AuditResult,
   target: string,

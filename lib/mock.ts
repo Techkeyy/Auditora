@@ -1,9 +1,9 @@
 import { providerOf } from "./gateway";
 import type { AuditorResult, RawFinding } from "./types";
 
-// Canned auditor outputs so the whole app works with no API key.
-// Modeled on the VulnerableVault.sol sample: a reentrancy all three catch,
-// a tx.origin auth two catch, and a lone flag only one raises.
+// Canned auditor outputs so the whole app works with no API key. Modeled on a
+// classic vulnerable vault: a real reentrancy, a tx.origin auth issue, and a
+// claim that the Challenger will later reject as a false positive.
 
 const A_GPT: RawFinding[] = [
   {

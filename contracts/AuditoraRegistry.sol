@@ -2,10 +2,11 @@
 pragma solidity ^0.8.24;
 
 /// @title  AuditoraRegistry — a public audit-attestation registry for Monad
-/// @notice Auditora runs a multi-model AI audit swarm over a deployed contract,
-///         then anchors the consensus verdict here. Anyone can look up any
-///         address and see: has this been audited, when, what did the swarm
-///         conclude — and does the code hash still match what was audited.
+/// @notice Auditora runs a review board of AI agents over a deployed contract,
+///         then anchors the verdict that survived adversarial challenge here.
+///         Anyone can look up any address and see: has this been audited, when,
+///         what did the board conclude — and does the code hash still match what
+///         was audited.
 ///
 ///         Attestations bind to the target's EXTCODEHASH at audit time, so a
 ///         verdict can never be carried over to different code. (Known limit:
@@ -16,8 +17,8 @@ contract AuditoraRegistry {
         bytes32 codehash;     // EXTCODEHASH of target at audit time
         bytes32 reportHash;   // keccak256 of the canonical report JSON
         uint8   posture;      // 0 = clean, 1 = no-consensus, 2 = corroborated
-        uint16  corroborated; // findings flagged by 2+ independent models
-        uint16  lone;         // single-model (unverified) flags
+        uint16  corroborated; // findings confirmed (survived the Challenger)
+        uint16  lone;         // findings disputed (Challenger could not fully rule out)
         uint64  timestamp;
         address attester;
     }
@@ -82,7 +83,7 @@ contract AuditoraRegistry {
 
     // ---------------------------------------------------------------- writes
 
-    /// @notice Pay the fee to queue any deployed contract for a swarm audit.
+    /// @notice Pay the fee to queue any deployed contract for a board review.
     function requestAudit(address target) external payable returns (uint256 id) {
         if (msg.value < requestFee) revert FeeTooLow(msg.value, requestFee);
         if (target.code.length == 0) revert NotAContract(target);
@@ -91,7 +92,7 @@ contract AuditoraRegistry {
         emit AuditRequested(id, target, msg.sender, msg.value);
     }
 
-    /// @notice Anchor a swarm verdict for `target`. Pass NO_REQUEST when the
+    /// @notice Anchor a board verdict for `target`. Pass NO_REQUEST when the
     ///         audit wasn't triggered by a paid onchain request.
     function attest(
         address target,

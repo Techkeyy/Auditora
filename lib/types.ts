@@ -64,7 +64,7 @@ export interface CallCost {
   estimated?: boolean;
 }
 
-/** The honest cost receipt for a whole swarm run. */
+/** The honest cost receipt for a whole board run. */
 export interface Receipt {
   calls: number;
   totalUsd: number;

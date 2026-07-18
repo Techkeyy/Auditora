@@ -196,7 +196,7 @@ export async function runAudit(mode: Mode, input: string): Promise<AuditResult> 
   if (!auditors.some((a) => !a.error)) {
     return {
       mode,
-      headline: "No auditors completed — the swarm could not run.",
+      headline: "No auditors completed — the board could not run.",
       posture: {
         level: "no-consensus",
         line: "Every auditor call failed, so there is nothing to reconcile — see the errors below (often an out-of-credits gateway).",
