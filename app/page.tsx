@@ -498,15 +498,17 @@ function Results({
         )}
       </div>
 
-      {/* the debate — the auditors' raw claims, before the Challenger ruled */}
+      {/* the bench — the Auditor's raw claims, before the Challenger ruled */}
       <div className="debate">
-        <div className="eyebrow">The bench · what each auditor claimed</div>
+        <div className="eyebrow">The bench · what the Auditor claimed</div>
         <div className="debate-grid">
-          {auditors.map((a) => (
+          {auditors.map((a, i) => (
             <div key={a.model} className="auditor">
               <div className="auditor-head">
-                <span className="auditor-model num">{a.model}</span>
-                <span className="auditor-prov">{a.provider}</span>
+                <span className="auditor-model">
+                  {auditors.length > 1 ? `Auditor ${i + 1}` : "Auditor"}
+                </span>
+                <span className="auditor-prov num">{a.model}</span>
               </div>
               {a.error ? (
                 <div className="err">error: {a.error}</div>
@@ -613,17 +615,18 @@ function Finding({
             </div>
           )}
           <div className="agreed">
-            <span className="lbl">
-              {f.origin === "challenger" ? "Raised by" : "Claimed by"}
-            </span>
+            <span className="lbl">Raised by</span>
             {f.origin === "challenger" ? (
               <span className="chip on">the Challenger</span>
             ) : (
-              f.auditorsClaimed.map((m) => (
-                <span key={m} className="chip on">
-                  {m}
-                </span>
-              ))
+              <>
+                <span className="chip on">the Auditor</span>
+                {f.auditorsClaimed.length > 0 && (
+                  <span className="chip-model num">
+                    {f.auditorsClaimed.join(" · ")}
+                  </span>
+                )}
+              </>
             )}
           </div>
         </div>

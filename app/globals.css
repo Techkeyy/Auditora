@@ -304,6 +304,7 @@ section[id] { scroll-margin-top: var(--nav-h); }
 .agreed .lbl { font-family: var(--font-num); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); margin-right: 4px; }
 .chip { font-family: var(--font-mono); font-size: 11px; color: var(--text-2); border: 1px solid var(--border-strong); border-radius: 5px; padding: 3px 8px; }
 .chip.on { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
+.chip-model { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.02em; color: var(--text-3); padding: 3px 4px; }
 
 /* debate */
 .debate { margin-top: 26px; }
